@@ -1,0 +1,5 @@
+pillow
+torch
+huggingface_hub
+transformers
+bitsandbytes
