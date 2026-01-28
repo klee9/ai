@@ -9,7 +9,7 @@ class Gemma:
         self.last_response = None
 
     def generate_content(self, contents: list):
-        '''
+        """
           Generate content with given contents (image and prompt)
 
           Args:
@@ -17,7 +17,7 @@ class Gemma:
 
           Returns:
             - Generated text response by Gemma
-        '''
+        """
 
         if contents is None or len(contents) == 0:
             raise ValueError("Contents must be provided.")
@@ -35,7 +35,7 @@ class Gemma:
         return response.text
     
     def print_delay(self):
-        '''
+        """
           Prints the response time for the last generation request
-        '''
+        """
         print(f"Response Time: {self.delay: .3f} seconds")
