@@ -13,6 +13,7 @@ from app.agents.contracts import (
 )
 from app.agents.avoid_intake_agent import AvoidIntakeAgent
 from app.agents.extract_agent import MenuExtractAgent
+from app.agents.preprocess_agent import ImagePreprocessAgent
 from app.agents.risk_assess_agent import RiskAssessAgent
 from app.agents.score_policy_agent import ScorePolicyAgent
 from app.agents.translate_agent import TranslateAgent
@@ -23,7 +24,7 @@ from app.utils.image_io import load_image_from_url
 class MenuAgentOrchestrator:
     """
     Agent 실행 순서를 통제하는 얇은 오케스트레이터.
-    Agent 실행 순서(Extract -> RiskAssess -> ScorePolicy)를 담당한다.
+    Agent 실행 순서(Preprocess -> Extract -> RiskAssess -> ScorePolicy)를 담당한다.
     """
 
     def __init__(self, gemma: GemmaClient, uncertainty_penalty: int = 40, max_risk_retries: int = 1):
@@ -31,6 +32,7 @@ class MenuAgentOrchestrator:
         self.uncertainty_penalty = uncertainty_penalty
         self.max_risk_retries = max(0, int(max_risk_retries))
         self.extract_agent = MenuExtractAgent(gemma)
+        self.preprocess_agent = ImagePreprocessAgent()
         self.risk_assess_agent = RiskAssessAgent(gemma)
         self.score_policy_agent = ScorePolicyAgent()
         self.avoid_intake_agent = AvoidIntakeAgent(gemma)
@@ -50,6 +52,11 @@ class MenuAgentOrchestrator:
             # 이미지 다운로드 실패는 API 레이어에서 400으로 매핑됨
             raise ImageLoadError(f"failed to load image from url: {image_url}") from exc
         timings_ms["image_load"] = self._elapsed_ms(t_image)
+
+        t_preprocess = time.perf_counter()
+        # Gemma 추출 전, 문서 정렬/대비/노이즈를 보정해 OCR 친화적인 입력으로 정규화한다.
+        data, mime = self.preprocess_agent.run(data, mime)
+        timings_ms["preprocess"] = self._elapsed_ms(t_preprocess)
 
         t_extract = time.perf_counter()
         img_part = self.gemma.image_part_from_bytes(data, mime)

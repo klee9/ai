@@ -13,6 +13,38 @@ class ExtractOutput(BaseModel):
     items: List[str] = Field(default_factory=list, description="추출된 메뉴명 리스트")
 
 
+class OCRLine(BaseModel):
+    text: str = Field("", description="OCR로 인식한 원문 텍스트")
+    confidence: float = Field(0.0, ge=0.0, le=1.0, description="OCR 신뢰도")
+    bbox: List[List[float]] = Field(
+        default_factory=list,
+        description="텍스트 박스 4점 좌표([[x1,y1],...,[x4,y4]])",
+    )
+
+
+class OCROptions(BaseModel):
+    min_confidence: float = Field(0.5, ge=0.0, le=1.0, description="최소 신뢰도 필터")
+
+
+class OCROutput(BaseModel):
+    lines: List[OCRLine] = Field(default_factory=list, description="OCR 라인 결과")
+    texts: List[str] = Field(default_factory=list, description="OCR 라인 텍스트만 추출한 결과")
+
+
+class OCRTextLabel(BaseModel):
+    text: str = Field("", description="OCR 원문 텍스트")
+    label: str = Field(
+        "other",
+        description="분류 라벨(menu_item/section_header/description/price/option/other)",
+    )
+    is_menu: bool = Field(False, description="음식 메뉴명 여부")
+
+
+class OCRMenuJudgeOutput(BaseModel):
+    items: List[OCRTextLabel] = Field(default_factory=list, description="텍스트별 메뉴명 판정")
+    menu_texts: List[str] = Field(default_factory=list, description="메뉴명으로 판정된 텍스트")
+
+
 class AvoidEvidence(BaseModel):
     ingredient: str = Field(..., description="avoid 리스트에 포함된 재료명")
     evidence_type: Literal["direct", "common_recipe", "uncertain"] = Field(

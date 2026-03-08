@@ -43,6 +43,7 @@ class OrchestratorTest(unittest.TestCase):
         self.assertIsNotNone(result.best)
         self.assertEqual(result.best.menu, "Katsu Don")
         self.assertIn("image_load", result.timings_ms)
+        self.assertIn("preprocess", result.timings_ms)
         self.assertIn("extract", result.timings_ms)
         self.assertIn("risk_assess", result.timings_ms)
         self.assertIn("score_policy", result.timings_ms)
