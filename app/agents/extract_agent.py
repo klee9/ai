@@ -1,6 +1,6 @@
 from google.genai import types
 
-from app.agents.contracts import ExtractOutput
+from app.agents._0_contracts import ExtractOutput
 from app.clients.gemma_client import GemmaClient
 from app.utils.parsing import extract_first_json_object, normalize_list
 

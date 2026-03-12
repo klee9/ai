@@ -3,10 +3,10 @@ import json
 import os
 import time
 
-from app.agents.contracts import OCROptions
-from app.agents.menu_text_judge_agent import OCRMenuJudgeAgent
-from app.agents.ocr_agent import OCRAgent
-from app.agents.preprocess_agent import ImagePreprocessAgent
+from app.agents._0_contracts import OCROptions
+from app.agents._eval_3_extractor import OCRMenuJudgeAgent
+from app.agents._eval_2_ocr import OCRAgent
+from app.agents._eval_1_img_preprocessor import ImagePreprocessAgent
 from app.clients.gemma_client import GemmaClient
 from app.utils.image_io import load_image
 
@@ -24,7 +24,7 @@ def build_parser():
         default="debug/menu_cycle_result.json",
         help="실험 결과 JSON 저장 경로",
     )
-    parser.add_argument("--ocr-lang", default="korean", help="PaddleOCR 언어 코드")
+    parser.add_argument("--menu-country-code", default="KR", help="국가 코드(ISO-3166 alpha-2, 예: KR/US/JP)")
     parser.add_argument("--min-confidence", type=float, default=0.5, help="OCR confidence 임계값")
     parser.add_argument(
         "--min-short-edge",
@@ -65,7 +65,7 @@ def main():
     pre_data, _ = pre.run(raw_data, mime, save_path=args.preprocessed_out)
     t_pre = int((time.perf_counter() - t0) * 1000)
 
-    ocr = OCRAgent(lang=args.ocr_lang)
+    ocr = OCRAgent(menu_country_code=args.menu_country_code)
     ocr_opts = OCROptions(min_confidence=args.min_confidence)
     try:
         t1 = time.perf_counter()
@@ -91,6 +91,9 @@ def main():
         return 1
 
     menu_texts = judged.menu_texts
+    label_groups = {}
+    for it in judged.items:
+        label_groups.setdefault(it.label, []).append(it.text)
 
     print("=== Menu Cycle Result ===")
     print(f"image            : {args.image}")
@@ -102,7 +105,18 @@ def main():
 
     top_n = max(0, int(args.top))
     for idx, text in enumerate(menu_texts[:top_n], start=1):
-        print(f"[{idx:03d}] {text}")
+        print(f"[MENU {idx:03d}] {text}")
+
+    if label_groups:
+        print("")
+        print("=== Label Breakdown ===")
+        for label in sorted(label_groups.keys()):
+            texts = label_groups[label]
+            print(f"{label:16}: {len(texts)}")
+            for idx, text in enumerate(texts[:top_n], start=1):
+                print(f"  [{idx:03d}] {text}")
+            if len(texts) > top_n:
+                print(f"  ... ({len(texts) - top_n} more)")
 
     ensure_parent(args.json_out)
     payload = {

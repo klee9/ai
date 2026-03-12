@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from app.agents.contracts import FinalResponse, ScoredItem
-from app.agents.orchestrator import ImageLoadError
+from app.agents._0_contracts import FinalResponse, ScoredItem
+from app.agents._0_orchestrator import ImageLoadError
 
 
 class DummyOrchestrator:

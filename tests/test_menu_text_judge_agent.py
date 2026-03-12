@@ -1,7 +1,7 @@
 import unittest
 
-from app.agents.contracts import OCRLine
-from app.agents.menu_text_judge_agent import OCRMenuJudgeAgent
+from app.agents._0_contracts import OCRLine
+from app.agents._eval_3_extractor import OCRMenuJudgeAgent
 
 
 class _FakeGemma:

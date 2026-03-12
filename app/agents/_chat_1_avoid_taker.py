@@ -1,4 +1,4 @@
-from app.agents.contracts import AvoidIntakeInput, AvoidIntakeOutput
+from app.agents._0_contracts import AvoidIntakeInput, AvoidIntakeOutput
 from app.clients.gemma_client import GemmaClient
 from app.utils.parsing import extract_first_json_object, normalize_list
 
@@ -39,7 +39,7 @@ RULES
 OUTPUT JSON ONLY:
 {{
   "candidates": ["egg", "milk"],
-  "confirm_question": "Are you avoiding egg and milk?"
+  "confirm_question": "Just to confirm, Are you avoiding egg and milk?"
 }}
 """.strip()
 

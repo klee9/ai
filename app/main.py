@@ -1,7 +1,7 @@
 import os
 import json
 
-from app.agents.preprocess_agent import ImagePreprocessAgent
+from app.agents._eval_1_img_preprocessor import ImagePreprocessAgent
 from app.utils.image_io import load_image
 from app.clients.gemma_client import GemmaClient
 from app.services.step1_extract import MenuExtractor

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from app.agents.contracts import RiskAssessInput, ScorePolicyInput
+from app.agents._0_contracts import RiskAssessInput, ScorePolicyInput
 from app.agents.risk_assess_agent import RiskAssessAgent
 from app.agents.score_policy_agent import ScorePolicyAgent
 from app.clients.gemma_client import GemmaClient

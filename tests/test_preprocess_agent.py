@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 
-from app.agents.preprocess_agent import ImagePreprocessAgent
+from app.agents._eval_1_img_preprocessor import ImagePreprocessAgent
 
 
 class ImagePreprocessAgentTest(unittest.TestCase):

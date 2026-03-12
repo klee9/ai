@@ -1,6 +1,6 @@
 import unittest
 
-from app.agents.contracts import TranslateInput
+from app.agents._0_contracts import TranslateInput
 from app.agents.translate_agent import TranslateAgent
 
 

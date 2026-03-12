@@ -1,6 +1,6 @@
 import unittest
 
-from app.agents.contracts import RiskAssessInput
+from app.agents._0_contracts import RiskAssessInput
 from app.agents.risk_assess_agent import RiskAssessAgent
 
 

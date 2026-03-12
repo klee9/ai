@@ -1,7 +1,7 @@
 import re
 import unicodedata
 
-from app.agents.contracts import AvoidEvidence, RiskAssessInput, RiskAssessOutput, RiskItem
+from app.agents._0_contracts import AvoidEvidence, RiskAssessInput, RiskAssessOutput, RiskItem
 from app.clients.gemma_client import GemmaClient
 from app.utils.parsing import clamp_float, clamp_int, extract_first_json_object, normalize_list
 

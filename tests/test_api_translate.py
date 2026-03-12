@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from app.agents.contracts import AvoidIntakeOutput, TranslateItem, TranslateOutput
+from app.agents._0_contracts import AvoidIntakeOutput, TranslateItem, TranslateOutput
 
 
 class DummyOrchestratorForTranslate:

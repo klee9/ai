@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch
 
-from app.agents.contracts import OCROptions
-from app.agents.ocr_agent import OCRAgent
+from app.agents._0_contracts import OCROptions
+from app.agents._eval_2_ocr import OCRAgent
 
 
 class _FakeEngine:

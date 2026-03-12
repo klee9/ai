@@ -1,4 +1,4 @@
-from app.agents.contracts import ScoredItem, ScorePolicyInput, ScorePolicyOutput
+from app.agents._0_contracts import ScoredItem, ScorePolicyInput, ScorePolicyOutput
 
 
 class ScorePolicyAgent:

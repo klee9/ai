@@ -1,4 +1,4 @@
-from app.agents.contracts import (
+from app.agents._0_contracts import (
     AvoidEvidence,
     AvoidIntakeInput,
     AvoidIntakeOutput,
@@ -21,12 +21,12 @@ from app.agents.contracts import (
     ScorePolicyInput,
     ScorePolicyOutput,
 )
-from app.agents.avoid_intake_agent import AvoidIntakeAgent
+from app.agents._chat_1_avoid_taker import AvoidIntakeAgent
 from app.agents.extract_agent import MenuExtractAgent
-from app.agents.menu_text_judge_agent import OCRMenuJudgeAgent
-from app.agents.orchestrator import MenuAgentOrchestrator
-from app.agents.ocr_agent import OCRAgent
-from app.agents.preprocess_agent import ImagePreprocessAgent
+from app.agents._eval_3_extractor import OCRMenuJudgeAgent
+from app.agents._0_orchestrator import MenuAgentOrchestrator
+from app.agents._eval_2_ocr import OCRAgent
+from app.agents._eval_1_img_preprocessor import ImagePreprocessAgent
 from app.agents.risk_assess_agent import RiskAssessAgent
 from app.agents.score_policy_agent import ScorePolicyAgent
 from app.agents.translate_agent import TranslateAgent

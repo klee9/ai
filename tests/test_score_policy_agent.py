@@ -1,6 +1,6 @@
 import unittest
 
-from app.agents.contracts import AvoidEvidence, RiskItem, ScorePolicyInput
+from app.agents._0_contracts import AvoidEvidence, RiskItem, ScorePolicyInput
 from app.agents.score_policy_agent import ScorePolicyAgent
 
 

@@ -1,7 +1,7 @@
 import unittest
 
-from app.agents.avoid_intake_agent import AvoidIntakeAgent
-from app.agents.contracts import AvoidIntakeInput
+from app.agents._chat_1_avoid_taker import AvoidIntakeAgent
+from app.agents._0_contracts import AvoidIntakeInput
 
 
 class FakeGemma:

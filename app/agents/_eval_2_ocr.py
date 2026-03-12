@@ -2,35 +2,29 @@ from __future__ import annotations
 
 from typing import Any, List, Optional
 
-from app.agents.contracts import OCRLine, OCROptions, OCROutput
+import cv2
+import numpy as np
 
-try:
-    import cv2
-except Exception:  # pragma: no cover
-    cv2 = None
-
-try:
-    import numpy as np
-except Exception:  # pragma: no cover
-    np = None
+from app.agents._0_contracts import OCRLine, OCROptions, OCROutput
 
 
 class OCRAgent:
-    """PaddleOCR로 이미지 텍스트를 뽑는 최소 Agent."""
+    """PaddleOCR text extractor (CPU baseline)."""
 
     def __init__(
         self,
-        lang: str = "korean",
-        use_doc_orientation_classify: bool = False,
-        use_doc_unwarping: bool = False,
-        use_textline_orientation: bool = False,
-        text_det_limit_side_len: int = 960,
+        menu_country_code: str = "KR",
+        ocr_lang_override: Optional[str] = None,
+        text_det_limit_side_len: int = 1216,
+        text_recognition_batch_size: int = 4,
+        cpu_threads: int = 6,
+        det_model_name: str = "PP-OCRv5_mobile_det",
     ):
-        self.lang = lang
-        self.use_doc_orientation_classify = use_doc_orientation_classify
-        self.use_doc_unwarping = use_doc_unwarping
-        self.use_textline_orientation = use_textline_orientation
-        self.text_det_limit_side_len = text_det_limit_side_len
+        self.lang = self._resolve_lang(menu_country_code=menu_country_code, ocr_lang_override=ocr_lang_override)
+        self.text_det_limit_side_len = max(256, int(text_det_limit_side_len))
+        self.text_recognition_batch_size = max(1, int(text_recognition_batch_size))
+        self.cpu_threads = max(1, int(cpu_threads))
+        self.det_model_name = (det_model_name or "PP-OCRv5_mobile_det").strip()
         self._ocr_engine = None
 
     def run(self, image_bytes: bytes, options: Optional[OCROptions] = None) -> OCROutput:
@@ -39,12 +33,8 @@ class OCRAgent:
         if image is None:
             return OCROutput(lines=[], texts=[])
 
-        # PaddleOCR 버전별로 ocr()가 `cls` 인자를 받지 않을 수 있어
-        # 최소 호출 형태(이미지만 전달)로 호환성을 유지한다.
         raw = self._get_ocr_engine().ocr(image)
         lines = self._parse_lines(raw)
-
-        # 기본 정리: 공백 제거 + confidence 필터 + 위->아래, 좌->우 정렬
         lines = [
             OCRLine(text=ln.text.strip(), confidence=ln.confidence, bbox=ln.bbox)
             for ln in lines
@@ -68,20 +58,78 @@ class OCRAgent:
                 "paddleocr가 설치되지 않았습니다. `pip install paddleocr paddlepaddle` 후 다시 시도하세요."
             ) from exc
 
-        # 속도 우선 설정: 문서 보정/방향 관련 보조 모델은 끄고
-        # 텍스트 검출 입력 해상도를 제한해 추론 시간을 줄인다.
-        self._ocr_engine = PaddleOCR(
-            lang=self.lang,
-            use_doc_orientation_classify=self.use_doc_orientation_classify,
-            use_doc_unwarping=self.use_doc_unwarping,
-            use_textline_orientation=self.use_textline_orientation,
-            text_det_limit_side_len=self.text_det_limit_side_len,
-        )
-        return self._ocr_engine
+        kwargs_v1 = {
+            "lang": self.lang,
+            "use_doc_orientation_classify": False,
+            "use_doc_unwarping": False,
+            "use_textline_orientation": False,
+            "text_det_limit_side_len": self.text_det_limit_side_len,
+            "text_recognition_batch_size": self.text_recognition_batch_size,
+            "device": "cpu",
+            "enable_mkldnn": True,
+            "cpu_threads": self.cpu_threads,
+        }
+        if self.lang in {"en", "ch", "chinese_cht"} and self.det_model_name:
+            kwargs_v1["text_detection_model_name"] = self.det_model_name
+
+        kwargs_v2 = {
+            "lang": self.lang,
+            "det_limit_side_len": self.text_det_limit_side_len,
+            "rec_batch_num": self.text_recognition_batch_size,
+            "use_gpu": False,
+            "enable_mkldnn": True,
+            "cpu_threads": self.cpu_threads,
+            "use_angle_cls": False,
+        }
+
+        try:
+            self._ocr_engine = PaddleOCR(**kwargs_v1)
+            return self._ocr_engine
+        except TypeError:
+            try:
+                self._ocr_engine = PaddleOCR(**kwargs_v2)
+                return self._ocr_engine
+            except Exception as exc:
+                raise RuntimeError(f"PaddleOCR 엔진 초기화 실패: {exc}") from exc
+        except Exception as exc:
+            raise RuntimeError(f"PaddleOCR 엔진 초기화 실패: {exc}") from exc
+
+    @staticmethod
+    def _resolve_lang(menu_country_code: Optional[str], ocr_lang_override: Optional[str]) -> str:
+        lang_aliases = {
+            "ko": "korean",
+            "korean": "korean",
+            "ja": "japan",
+            "japan": "japan",
+            "zh": "ch",
+            "zh-cn": "ch",
+            "zh-tw": "chinese_cht",
+            "ch": "ch",
+            "chinese_cht": "chinese_cht",
+            "en": "en",
+            "es": "es",
+        }
+        override = (ocr_lang_override or "").strip().lower()
+        if override:
+            return lang_aliases.get(override, "en")
+
+        country = (menu_country_code or "KR").strip().upper()
+        country = country.replace("_", "-").split("-", 1)[0]
+        country_to_lang = {
+            "KR": "korean",
+            "JP": "japan",
+            "CN": "ch",
+            "TW": "chinese_cht",
+            "HK": "chinese_cht",
+            "US": "en",
+            "GB": "en",
+            "ES": "es",
+        }
+        return country_to_lang.get(country, "en")
 
     @staticmethod
     def _decode_image(image_bytes: bytes):
-        if cv2 is None or np is None or not image_bytes:
+        if not image_bytes:
             return None
         buf = np.frombuffer(image_bytes, dtype=np.uint8)
         if buf.size == 0:
@@ -89,21 +137,13 @@ class OCRAgent:
         return cv2.imdecode(buf, cv2.IMREAD_COLOR)
 
     def _parse_lines(self, raw: Any) -> List[OCRLine]:
-        # 기대 반환:
-        # 1) 구버전: [[bbox, (text, conf)], ...] 또는 [[[...], ...]]
-        # 2) 신버전: [{"dt_polys": [...], "rec_texts": [...], "rec_scores": [...]}]
         if not isinstance(raw, list) or not raw:
             return []
 
-        # PaddleOCR 신버전(dict 기반) 처리
         if isinstance(raw[0], dict):
             return self._parse_dict_result(raw)
 
-        if self._is_line_item(raw[0]):
-            groups = [raw]
-        else:
-            groups = [g for g in raw if isinstance(g, list)]
-
+        groups = [raw] if self._is_line_item(raw[0]) else [g for g in raw if isinstance(g, list)]
         out: List[OCRLine] = []
         for group in groups:
             for item in group:
@@ -124,14 +164,10 @@ class OCRAgent:
 
             n = min(len(polys), len(texts), len(scores))
             for i in range(n):
-                bbox_raw = polys[i]
-                txt_raw = texts[i]
-                score_raw = scores[i]
-
-                bbox = OCRAgent._to_bbox_points(bbox_raw)
-                text = str(txt_raw or "")
+                bbox = OCRAgent._to_bbox_points(polys[i])
+                text = str(texts[i] or "")
                 try:
-                    conf = float(score_raw)
+                    conf = float(scores[i])
                 except Exception:
                     conf = 0.0
                 conf = max(0.0, min(1.0, conf))
@@ -147,18 +183,11 @@ class OCRAgent:
         if not isinstance(item, list) or len(item) < 2:
             return None
 
-        bbox_raw, txt_raw = item[0], item[1]
-        if not isinstance(bbox_raw, (list, tuple)):
+        bbox = OCRAgent._to_bbox_points(item[0])
+        if not bbox:
             return None
 
-        bbox = []
-        for pt in bbox_raw:
-            if isinstance(pt, (list, tuple)) and len(pt) >= 2:
-                try:
-                    bbox.append([float(pt[0]), float(pt[1])])
-                except Exception:
-                    continue
-
+        txt_raw = item[1]
         text = ""
         conf = 0.0
         if isinstance(txt_raw, (list, tuple)) and len(txt_raw) >= 1:
@@ -170,65 +199,40 @@ class OCRAgent:
                     conf = 0.0
         else:
             text = str(txt_raw or "")
-
         conf = max(0.0, min(1.0, conf))
         return OCRLine(text=text, confidence=conf, bbox=bbox)
 
     @staticmethod
     def _first_present(data: dict, keys: List[str], default: Any):
         for k in keys:
-            if k not in data:
-                continue
             v = data.get(k)
-            if v is None:
-                continue
-            return v
+            if v is not None:
+                return v
         return default
 
     @staticmethod
     def _to_bbox_points(bbox_raw: Any) -> List[List[float]]:
-        """
-        PaddleOCR 버전에 따라 bbox가 list/tuple/ndarray 형태로 올 수 있어
-        2차원 점 배열이면 모두 [[x,y], ...]로 정규화한다.
-        """
         if bbox_raw is None:
             return []
 
-        pts_src = bbox_raw
-        if np is not None and hasattr(bbox_raw, "tolist"):
-            try:
-                pts_src = bbox_raw.tolist()
-            except Exception:
-                pts_src = bbox_raw
-
+        pts_src = bbox_raw.tolist() if hasattr(bbox_raw, "tolist") else bbox_raw
         if not isinstance(pts_src, (list, tuple)):
             return []
 
         pts: List[List[float]] = []
         for pt in pts_src:
-            cur = pt
-            if np is not None and hasattr(cur, "tolist"):
-                try:
-                    cur = cur.tolist()
-                except Exception:
-                    pass
+            cur = pt.tolist() if hasattr(pt, "tolist") else pt
             if not isinstance(cur, (list, tuple)) or len(cur) < 2:
                 continue
             try:
-                x = float(cur[0])
-                y = float(cur[1])
+                pts.append([float(cur[0]), float(cur[1])])
             except Exception:
                 continue
-            pts.append([x, y])
         return pts
 
     @staticmethod
     def _top_y(bbox: List[List[float]]) -> float:
         return min((p[1] for p in bbox), default=0.0)
-
-    @staticmethod
-    def _bottom_y(bbox: List[List[float]]) -> float:
-        return max((p[1] for p in bbox), default=0.0)
 
     @staticmethod
     def _left_x(bbox: List[List[float]]) -> float:

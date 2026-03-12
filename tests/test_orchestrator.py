@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch
 
-from app.agents.contracts import ScoredItem
-from app.agents.orchestrator import MenuAgentOrchestrator
+from app.agents._0_contracts import ScoredItem
+from app.agents._0_orchestrator import MenuAgentOrchestrator
 
 
 class FakeGemma:

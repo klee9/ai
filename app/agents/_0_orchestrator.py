@@ -1,7 +1,7 @@
 import time
 from typing import List, Optional
 
-from app.agents.contracts import (
+from app.agents._0_contracts import (
     AvoidIntakeInput,
     FinalResponse,
     RiskAssessInput,
@@ -11,9 +11,9 @@ from app.agents.contracts import (
     ScoredItem,
     ScorePolicyInput,
 )
-from app.agents.avoid_intake_agent import AvoidIntakeAgent
+from app.agents._chat_1_avoid_taker import AvoidIntakeAgent
 from app.agents.extract_agent import MenuExtractAgent
-from app.agents.preprocess_agent import ImagePreprocessAgent
+from app.agents._eval_1_img_preprocessor import ImagePreprocessAgent
 from app.agents.risk_assess_agent import RiskAssessAgent
 from app.agents.score_policy_agent import ScorePolicyAgent
 from app.agents.translate_agent import TranslateAgent
@@ -38,9 +38,16 @@ class MenuAgentOrchestrator:
         self.avoid_intake_agent = AvoidIntakeAgent(gemma)
         self.translate_agent = TranslateAgent(gemma)
 
-    def run(self, image_url: str, avoid: List[str], lang: str = "ko") -> FinalResponse:
+    def run(
+        self,
+        image_url: str,
+        avoid: List[str],
+        user_lang: str = "ko",
+        menu_country_code: str = "KR",
+    ) -> FinalResponse:
         # 허용 언어 외 값은 기본 한국어로 처리
-        lang = lang if lang in {"ko", "en", "cn"} else "ko"
+        lang = user_lang if user_lang in {"ko", "en", "cn"} else "ko"
+        _ = (menu_country_code or "KR").strip().upper()
         t_total = time.perf_counter()
         timings_ms = {}
 

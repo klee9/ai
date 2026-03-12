@@ -1,4 +1,4 @@
-from app.agents.contracts import TranslateInput, TranslateItem, TranslateOutput
+from app.agents._0_contracts import TranslateInput, TranslateItem, TranslateOutput
 from app.clients.gemma_client import GemmaClient
 from app.utils.parsing import clamp_float, extract_first_json_object
 
