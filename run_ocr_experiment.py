@@ -101,6 +101,7 @@ def main():
     print(f"preprocessed       : {args.preprocessed_out}")
     print(f"menu_country_code  : {args.menu_country_code}")
     print(f"resolved_ocr_lang  : {ocr.lang}")
+    print(f"image_context      : {not args.no_image_context}")
     print(f"ocr_lines          : {len(ocr_out.lines)}")
     print(f"menu_texts         : {len(judged.menu_texts)}")
     print(f"timings(ms)        : preprocess={t_pre}, ocr={t_ocr}, extractor={t_ext}, total={t_total}")

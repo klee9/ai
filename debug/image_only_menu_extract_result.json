@@ -1,0 +1,183 @@
+{
+  "input_image": "menu_image/menu_korean.jpeg",
+  "with_preprocess": true,
+  "preprocessed_image": "debug/preprocessed_for_image_only_extract.png",
+  "prompt": "You are a menu-item extractor working from a photographed menu image.\n\nGoal:\nExtract only final orderable menu item names from the image.\n\nRules:\n- Return only items a customer could directly order.\n- Exclude prices, currency, numbers that are clearly prices, option labels, size labels, temperature labels, add-ons, quantities, serving-count phrases, set titles, section headers, promotional text, store info, and descriptive copy.\n- If a visible text chunk mixes a clear menu name with extra description, keep only the clean menu name when the boundary is clear. Otherwise omit it.\n- Preserve the original language/script exactly as shown in the menu. Do not translate.\n- Normalize obvious OCR-style spacing only when needed to form a readable menu name, but do not rewrite wording.\n- Deduplicate near-identical outputs.\n- Prefer precision over recall: do not include borderline candidates unless they clearly look orderable.\n\nOutput JSON only:\n{\n  \"items\": [\"string\"]\n}",
+  "raw_extracted_items": [
+    "주무대택",
+    "궁중완전점",
+    "궁중복육이",
+    "검게된정병",
+    "역갈비",
+    "소갈비찜",
+    "소갈비전문상",
+    "항정살치찌개상",
+    "결들림 택 1"
+  ],
+  "clean_result": {
+    "cleaned_items": [
+      "항정살치찌개상",
+      "소갈비전문상",
+      "검게된정병",
+      "궁중복육이",
+      "궁중완전점",
+      "소갈비찜",
+      "주무대택",
+      "결들림 택 1",
+      "역갈비"
+    ],
+    "kept": [
+      {
+        "raw_text": "항정살치찌개상",
+        "cleaned_text": "항정살치찌개상",
+        "compact_text": "항정살치찌개상",
+        "status": "kept",
+        "reasons": [],
+        "score": 7.0,
+        "metrics": {
+          "letter_count": 7.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 7.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "소갈비전문상",
+        "cleaned_text": "소갈비전문상",
+        "compact_text": "소갈비전문상",
+        "status": "kept",
+        "reasons": [],
+        "score": 6.0,
+        "metrics": {
+          "letter_count": 6.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 6.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "검게된정병",
+        "cleaned_text": "검게된정병",
+        "compact_text": "검게된정병",
+        "status": "kept",
+        "reasons": [],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "궁중복육이",
+        "cleaned_text": "궁중복육이",
+        "compact_text": "궁중복육이",
+        "status": "kept",
+        "reasons": [],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "궁중완전점",
+        "cleaned_text": "궁중완전점",
+        "compact_text": "궁중완전점",
+        "status": "kept",
+        "reasons": [],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "소갈비찜",
+        "cleaned_text": "소갈비찜",
+        "compact_text": "소갈비찜",
+        "status": "kept",
+        "reasons": [],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 4.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 4.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "주무대택",
+        "cleaned_text": "주무대택",
+        "compact_text": "주무대택",
+        "status": "kept",
+        "reasons": [],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 4.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 4.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "결들림 택 1",
+        "cleaned_text": "결들림 택 1",
+        "compact_text": "결들림택1",
+        "status": "kept",
+        "reasons": [],
+        "score": 3.1,
+        "metrics": {
+          "letter_count": 4.0,
+          "digit_count": 1.0,
+          "symbol_count": 0.0,
+          "token_count": 3.0,
+          "informative_count": 5.0,
+          "letter_ratio": 0.8
+        }
+      },
+      {
+        "raw_text": "역갈비",
+        "cleaned_text": "역갈비",
+        "compact_text": "역갈비",
+        "status": "kept",
+        "reasons": [],
+        "score": 3.0,
+        "metrics": {
+          "letter_count": 3.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 3.0,
+          "letter_ratio": 1.0
+        }
+      }
+    ],
+    "dropped": []
+  },
+  "timings_ms": {
+    "load": 1,
+    "preprocess": 56,
+    "extract": 3957,
+    "clean": 0
+  }
+}

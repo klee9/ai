@@ -12,13 +12,15 @@ from app.agents._0_contracts import (
     ScorePolicyInput,
 )
 from app.agents._chat_1_avoid_taker import AvoidIntakeAgent
-from app.agents.extract_agent import MenuExtractAgent
+from app.agents._eval_3_extractor import OCRMenuJudgeAgent
+from app.agents._eval_2_ocr import OCRAgent
 from app.agents._eval_1_img_preprocessor import ImagePreprocessAgent
 from app.agents._eval_4_1_risk_assessor import RiskAssessAgent
 from app.agents._eval_4_2_score_policy import ScorePolicyAgent
 from app.agents._0_translate_agent import TranslateAgent
 from app.clients.gemma_client import GemmaClient
 from app.utils.image_io import load_image
+from app.utils.menu_evidence_verifier import verify_risk_items
 
 
 class MenuAgentOrchestrator:
@@ -31,7 +33,7 @@ class MenuAgentOrchestrator:
         self.gemma = gemma
         self.uncertainty_penalty = uncertainty_penalty
         self.max_risk_retries = max(0, int(max_risk_retries))
-        self.extract_agent = MenuExtractAgent(gemma)
+        self.extract_agent = OCRMenuJudgeAgent(gemma)
         self.preprocess_agent = ImagePreprocessAgent()
         self.risk_assess_agent = RiskAssessAgent(gemma)
         self.score_policy_agent = ScorePolicyAgent()
@@ -54,7 +56,7 @@ class MenuAgentOrchestrator:
         # 1) Extract Agent
         t_image = time.perf_counter()
         try:
-            data, mime = load_image(image_url)
+            raw_data, raw_mime = load_image(image_url)
         except Exception as exc:
             # 로컬 파일/URL 로드 실패는 API 레이어에서 400으로 매핑됨
             raise ImageLoadError(f"failed to load image from source: {image_url}") from exc
@@ -62,17 +64,29 @@ class MenuAgentOrchestrator:
 
         t_preprocess = time.perf_counter()
         # Gemma 추출 전, 문서 정렬/대비/노이즈를 보정해 OCR 친화적인 입력으로 정규화한다.
-        data, mime = self.preprocess_agent.run(data, mime)
+        data, mime = self.preprocess_agent.run(raw_data, raw_mime)
         timings_ms["preprocess"] = self._elapsed_ms(t_preprocess)
 
         t_extract = time.perf_counter()
-        img_part = self.gemma.image_part_from_bytes(data, mime)
-        extracted = self.extract_agent.run(img_part)
+        ocr = OCRAgent(menu_country_code=menu_country_code)
+        ocr_out = ocr.run(data)
+        judged = self.extract_agent.run_lines_with_image(
+            lines=ocr_out.lines,
+            image_bytes=raw_data,
+            image_mime=raw_mime,
+            use_image_context=True,
+        )
+        extracted = judged.to_extract_output() if hasattr(judged, "to_extract_output") else None
+        if extracted is None:
+            from app.agents._0_contracts import ExtractOutput
+
+            extracted = ExtractOutput(items=judged.menu_texts)
         timings_ms["extract"] = self._elapsed_ms(t_extract)
 
         # 메뉴가 비어 있으면 후속 단계를 건너뛰고 바로 반환
         if not extracted.items:
             timings_ms["risk_assess"] = 0
+            timings_ms["risk_verify"] = 0
             timings_ms["score_policy"] = 0
             timings_ms["total"] = self._elapsed_ms(t_total)
             return FinalResponse(items_extracted=[], items=[], best=None, timings_ms=timings_ms)
@@ -91,15 +105,20 @@ class MenuAgentOrchestrator:
                 continue
         timings_ms["risk_assess"] = self._elapsed_ms(t_risk)
 
-        # 3) ScorePolicy Agent
-        t_score = time.perf_counter()
+        # 3) Risk verify + ScorePolicy Agent
+        t_verify = time.perf_counter()
         if risk_output is None:
+            timings_ms["risk_verify"] = 0
+            t_score = time.perf_counter()
             # Risk 단계가 끝내 실패하면 보수적 점수로 폴백
             score_output = self._fallback_score(extracted.items, lang=lang)
         else:
+            verified_risk_items = verify_risk_items(risk_output.items, avoid_terms=avoid, lang=lang)
+            timings_ms["risk_verify"] = self._elapsed_ms(t_verify)
+            t_score = time.perf_counter()
             score_output = self.score_policy_agent.run(
                 ScorePolicyInput(
-                    risk_items=risk_output.items,
+                    risk_items=verified_risk_items,
                     uncertainty_penalty=self.uncertainty_penalty,
                     lang=lang,
                 )
@@ -179,6 +198,8 @@ class MenuAgentOrchestrator:
             original_menu = (item.menu_original or item.menu or "").strip()
             if not original_menu or original_menu in seen_menus:
                 continue
+            if self._looks_already_localized(original_menu, target_lang):
+                continue
             seen_menus.add(original_menu)
             translate_candidates.append(original_menu)
 
@@ -205,6 +226,16 @@ class MenuAgentOrchestrator:
             original_menu = (item.menu_original or item.menu or "").strip()
             if original_menu in translated_map:
                 item.menu = translated_map[original_menu]
+
+    @staticmethod
+    def _looks_already_localized(text: str, target_lang: str) -> bool:
+        if not text:
+            return False
+        if target_lang == "ko":
+            return any("\uac00" <= ch <= "\ud7a3" for ch in text)
+        if target_lang == "cn":
+            return any("\u4e00" <= ch <= "\u9fff" for ch in text)
+        return False
 
     def _localize_item_reasons(self, items: List[ScoredItem], lang: str) -> None:
         target_lang = lang if lang in {"ko", "en", "cn"} else "en"

@@ -1,3 +1,4 @@
+import re
 from typing import List, Optional
 
 from app.agents._0_contracts import OCRLine, OCRMenuJudgeOutput, OCRTextLabel
@@ -7,7 +8,7 @@ from app.utils.parsing import extract_first_json_object, normalize_list
 
 def build_general_menu_classification_prompt(payload: list[dict], use_image_context: bool) -> str:
     image_rule = (
-        "- Use the image only to resolve OCR ambiguity, visual grouping, and layout relationships.\n"
+        "- Use the image only to resolve OCR ambiguity and very local layout relationships.\n"
         if use_image_context
         else "- Use OCR text only. Do not infer missing text.\n"
     )
@@ -66,13 +67,18 @@ Important rules:
 - Classify every line exactly once using the same index.
 - Be conservative when uncertain.
 - If a line mixes a product identity with secondary details, classify based on the primary role of the line.
-- A line can still be menu_item even if it includes limited attached detail, as long as it still clearly expresses one complete orderable offering.
+- A line should be menu_item only when it is a clean orderable name. If description, slogan, taste notes, or explanatory copy are mixed in, prefer description/other.
+- If a line mainly looks like a set/menu-board phrase rather than a concrete dish name, do NOT label it as menu_item.
+- If a line contains a dish name plus a trailing standalone number or price fragment, treat the price part as secondary detail, not part of the menu identity.
+- If a line is mostly a marketing phrase, set-title fragment, audience/serving-count phrase, or descriptive copy, do NOT label it as menu_item unless a concrete orderable product identity is clearly present.
+- Prefer precision over recall: false positives are worse than missing a borderline menu item.
 - Do not assume the menu belongs to a specific venue type (cafe/restaurant/bar/bakery/etc.).
 - Do not rely on cuisine-specific assumptions.
 - Work across restaurants, cafes, bakeries, bars, food courts, kiosks, and multilingual menus.
 Visual grouping rule:
 - OCR may split one visible menu name into multiple fragments.
-- When the image clearly shows that adjacent fragments belong to one menu name on the same row or visual group, use that visual evidence when deciding whether the fragments represent a menu item.
+- Only treat fragments as one menu name when they appear to be parts of the same inline product name on the same row or baseline.
+- Do NOT merge vertically stacked title + description text, side badges, left/right gutter labels, section labels, or nearby explanatory copy into one menu item just because they are visually close.
 - Do not invent unsupported text, but do use the image to understand whether fragmented OCR tokens are part of one orderable offering.
 {image_rule}
 
@@ -116,9 +122,7 @@ class OCRMenuJudgeAgent:
         normalized_lines = self._normalize_lines(lines)
         if not normalized_lines:
             return OCRMenuJudgeOutput(items=[], menu_texts=[])
-        source_lines = self._reconstruct_lines_with_bbox(normalized_lines)
-        if not source_lines:
-            source_lines = normalized_lines
+        source_lines = normalized_lines
 
         if use_image_context and image_bytes and image_mime:
             label_map = self._extract_labels_with_image(source_lines, image_bytes, image_mime)
@@ -132,7 +136,9 @@ class OCRMenuJudgeAgent:
             item = OCRTextLabel(text=line.text, label=label, is_menu=(label == "menu_item"))
             out_items.append(item)
 
-        menu_texts = [it.text for it in out_items if it.label == "menu_item" and it.is_menu]
+        menu_texts = self._postprocess_menu_texts(
+            [it.text for it in out_items if it.label == "menu_item" and it.is_menu]
+        )
         return OCRMenuJudgeOutput(items=out_items, menu_texts=menu_texts)
 
     def _extract_labels_with_image(
@@ -239,138 +245,6 @@ class OCRMenuJudgeAgent:
                 seen.add(key)
         return out
 
-    def _reconstruct_lines_with_bbox(self, lines: List[OCRLine]) -> List[OCRLine]:
-        # bbox는 구조 복원(열/행/토큰 병합)에만 사용하고 LLM payload에는 포함하지 않는다.
-        boxed = [ln for ln in lines if self._has_bbox(ln)]
-        if len(boxed) < 2:
-            return lines
-
-        columns = self._group_by_column(boxed)
-        merged: List[OCRLine] = []
-        for col in columns:
-            rows = self._group_by_row(col)
-            for row in rows:
-                row_sorted = sorted(row, key=lambda ln: self._left_x(ln.bbox))
-                merged_text = self._merge_row_tokens(row_sorted)
-                if not merged_text:
-                    continue
-                conf = sum(max(0.0, min(1.0, float(ln.confidence))) for ln in row_sorted) / max(1, len(row_sorted))
-                merged.append(OCRLine(text=merged_text, confidence=conf, bbox=[]))
-
-        if not merged:
-            return lines
-        return self._normalize_lines(merged)
-
-    def _group_by_column(self, lines: List[OCRLine]) -> List[List[OCRLine]]:
-        # 좌우로 크게 벌어진 경우를 다른 column으로 본다.
-        enriched = []
-        widths = []
-        for ln in lines:
-            left = self._left_x(ln.bbox)
-            right = self._right_x(ln.bbox)
-            cx = (left + right) / 2.0
-            widths.append(max(1.0, right - left))
-            enriched.append((cx, ln))
-        if not enriched:
-            return []
-
-        median_w = sorted(widths)[len(widths) // 2]
-        split_gap = max(50.0, median_w * 1.8)
-        enriched.sort(key=lambda x: x[0])
-
-        cols: List[List[OCRLine]] = []
-        cur: List[OCRLine] = []
-        prev_cx: Optional[float] = None
-        for cx, ln in enriched:
-            if prev_cx is None or abs(cx - prev_cx) <= split_gap:
-                cur.append(ln)
-            else:
-                if cur:
-                    cols.append(cur)
-                cur = [ln]
-            prev_cx = cx
-        if cur:
-            cols.append(cur)
-
-        cols.sort(key=lambda c: min((self._left_x(ln.bbox) for ln in c), default=0.0))
-        return cols
-
-    def _group_by_row(self, lines: List[OCRLine]) -> List[List[OCRLine]]:
-        enriched = []
-        heights = []
-        for ln in lines:
-            top = self._top_y(ln.bbox)
-            bottom = self._bottom_y(ln.bbox)
-            cy = (top + bottom) / 2.0
-            h = max(8.0, bottom - top)
-            heights.append(h)
-            enriched.append((cy, ln))
-        if not enriched:
-            return []
-
-        median_h = sorted(heights)[len(heights) // 2]
-        row_gap = max(10.0, median_h * 0.7)
-        enriched.sort(key=lambda x: x[0])
-
-        rows: List[List[OCRLine]] = []
-        row_centers: List[float] = []
-        for cy, ln in enriched:
-            if not rows:
-                rows.append([ln])
-                row_centers.append(cy)
-                continue
-
-            if abs(cy - row_centers[-1]) <= row_gap:
-                rows[-1].append(ln)
-                n = float(len(rows[-1]))
-                row_centers[-1] = ((row_centers[-1] * (n - 1.0)) + cy) / n
-            else:
-                rows.append([ln])
-                row_centers.append(cy)
-        return rows
-
-    def _merge_row_tokens(self, row_sorted: List[OCRLine]) -> str:
-        tokens = [self._clean_token(ln.text) for ln in row_sorted if self._clean_token(ln.text)]
-        if not tokens:
-            return ""
-        if len(tokens) == 1:
-            return tokens[0]
-
-        out = [tokens[0]]
-        for i in range(1, len(tokens)):
-            prev_ln = row_sorted[i - 1]
-            cur_ln = row_sorted[i]
-            cur_tok = tokens[i]
-
-            gap = self._left_x(cur_ln.bbox) - self._right_x(prev_ln.bbox)
-            gap = max(0.0, gap)
-
-            prev_tok = self._clean_token(prev_ln.text)
-            join_no_space = (
-                (self._is_single_hangul_char(prev_tok) and self._is_single_hangul_char(cur_tok) and gap <= 16.0)
-                or gap <= 2.0
-            )
-            if join_no_space:
-                out[-1] = out[-1] + cur_tok
-            else:
-                out.append(cur_tok)
-        return " ".join(out).strip()
-
-    @staticmethod
-    def _clean_token(text: str) -> str:
-        return " ".join((text or "").split()).strip()
-
-    @staticmethod
-    def _is_single_hangul_char(token: str) -> bool:
-        if len(token) != 1:
-            return False
-        ch = token[0]
-        return "\uac00" <= ch <= "\ud7a3"
-
-    @staticmethod
-    def _has_bbox(line: OCRLine) -> bool:
-        return bool(line.bbox and len(line.bbox) >= 2)
-
     @staticmethod
     def _normalize_lines(lines: List[OCRLine]) -> List[OCRLine]:
         out: List[OCRLine] = []
@@ -389,6 +263,32 @@ class OCRMenuJudgeAgent:
         return out
 
     @staticmethod
+    def _postprocess_menu_texts(menu_texts: List[str]) -> List[str]:
+        out: List[str] = []
+        seen = set()
+
+        for text in menu_texts:
+            if not isinstance(text, str):
+                continue
+            cleaned = " ".join(text.split()).strip()
+            if not cleaned:
+                continue
+            cleaned = OCRMenuJudgeAgent._strip_trailing_price(cleaned)
+            if not cleaned:
+                continue
+            key = OCRMenuJudgeAgent._norm(cleaned)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(cleaned)
+
+        return out
+
+    @staticmethod
+    def _strip_trailing_price(text: str) -> str:
+        return re.sub(r"\s+\d+(?:\.\d+)?$", "", text).strip()
+
+    @staticmethod
     def _norm(s: str) -> str:
         return " ".join((s or "").strip().split()).casefold()
 
@@ -400,19 +300,3 @@ class OCRMenuJudgeAgent:
             return int(v)
         except Exception:
             return None
-
-    @staticmethod
-    def _top_y(bbox: List[List[float]]) -> float:
-        return min((p[1] for p in bbox), default=0.0)
-
-    @staticmethod
-    def _bottom_y(bbox: List[List[float]]) -> float:
-        return max((p[1] for p in bbox), default=0.0)
-
-    @staticmethod
-    def _left_x(bbox: List[List[float]]) -> float:
-        return min((p[0] for p in bbox), default=0.0)
-
-    @staticmethod
-    def _right_x(bbox: List[List[float]]) -> float:
-        return max((p[0] for p in bbox), default=0.0)

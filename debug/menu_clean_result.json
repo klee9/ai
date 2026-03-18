@@ -1,18 +1,351 @@
 {
-  "input_image": "menu_image/menu_korean.jpeg",
-  "with_preprocess": true,
-  "preprocessed_image": "debug/preprocessed_for_ocr_only.png",
-  "menu_country_code": "KR",
-  "ocr_lang_resolved": "korean",
+  "input_mode": "image",
+  "image": "menu_image/menu_korean.jpeg",
+  "raw_candidates": [
+    "제육한상",
+    "한상차림 담아낸 한상",
+    "항정살김치찌개한상",
+    "떡갈비한상",
+    "뚝배기불고기한상",
+    "담아낸한상",
+    "항정수육한상",
+    "부드러운소갈비한상",
+    "비빔밥한상",
+    "차돌육개장한상",
+    "궁중약선잡채",
+    "녹두빈대떡",
+    "궁중떡볶이",
+    "김치메밀전병",
+    "떡갈비 두쪽0.7",
+    "소갈비찜",
+    "소갈비찜한상",
+    "2인상차림 항정김치찌개한상"
+  ],
+  "clean_result": {
+    "cleaned_items": [
+      "2인상차림 항정김치찌개한상",
+      "부드러운소갈비한상",
+      "한상차림 담아낸 한상",
+      "항정살김치찌개한상",
+      "뚝배기불고기한상",
+      "차돌육개장한상",
+      "궁중약선잡채",
+      "김치메밀전병",
+      "소갈비찜한상",
+      "항정수육한상",
+      "궁중떡볶이",
+      "녹두빈대떡",
+      "담아낸한상",
+      "떡갈비 두쪽",
+      "떡갈비한상",
+      "비빔밥한상",
+      "제육한상"
+    ],
+    "kept": [
+      {
+        "raw_text": "2인상차림 항정김치찌개한상",
+        "cleaned_text": "2인상차림 항정김치찌개한상",
+        "compact_text": "2인상차림항정김치찌개한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 11.1,
+        "metrics": {
+          "letter_count": 12.0,
+          "digit_count": 1.0,
+          "symbol_count": 0.0,
+          "token_count": 2.0,
+          "informative_count": 13.0,
+          "letter_ratio": 0.9230769230769231
+        }
+      },
+      {
+        "raw_text": "부드러운소갈비한상",
+        "cleaned_text": "부드러운소갈비한상",
+        "compact_text": "부드러운소갈비한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 9.0,
+        "metrics": {
+          "letter_count": 9.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 9.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "한상차림 담아낸 한상",
+        "cleaned_text": "한상차림 담아낸 한상",
+        "compact_text": "한상차림담아낸한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 9.0,
+        "metrics": {
+          "letter_count": 9.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 3.0,
+          "informative_count": 9.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "항정살김치찌개한상",
+        "cleaned_text": "항정살김치찌개한상",
+        "compact_text": "항정살김치찌개한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 9.0,
+        "metrics": {
+          "letter_count": 9.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 9.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "뚝배기불고기한상",
+        "cleaned_text": "뚝배기불고기한상",
+        "compact_text": "뚝배기불고기한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 8.0,
+        "metrics": {
+          "letter_count": 8.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 8.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "차돌육개장한상",
+        "cleaned_text": "차돌육개장한상",
+        "compact_text": "차돌육개장한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 7.0,
+        "metrics": {
+          "letter_count": 7.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 7.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "궁중약선잡채",
+        "cleaned_text": "궁중약선잡채",
+        "compact_text": "궁중약선잡채",
+        "status": "kept",
+        "reasons": [],
+        "score": 6.0,
+        "metrics": {
+          "letter_count": 6.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 6.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "김치메밀전병",
+        "cleaned_text": "김치메밀전병",
+        "compact_text": "김치메밀전병",
+        "status": "kept",
+        "reasons": [],
+        "score": 6.0,
+        "metrics": {
+          "letter_count": 6.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 6.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "소갈비찜한상",
+        "cleaned_text": "소갈비찜한상",
+        "compact_text": "소갈비찜한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 6.0,
+        "metrics": {
+          "letter_count": 6.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 6.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "항정수육한상",
+        "cleaned_text": "항정수육한상",
+        "compact_text": "항정수육한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 6.0,
+        "metrics": {
+          "letter_count": 6.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 6.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "궁중떡볶이",
+        "cleaned_text": "궁중떡볶이",
+        "compact_text": "궁중떡볶이",
+        "status": "kept",
+        "reasons": [],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "녹두빈대떡",
+        "cleaned_text": "녹두빈대떡",
+        "compact_text": "녹두빈대떡",
+        "status": "kept",
+        "reasons": [],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "담아낸한상",
+        "cleaned_text": "담아낸한상",
+        "compact_text": "담아낸한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "떡갈비 두쪽0.7",
+        "cleaned_text": "떡갈비 두쪽",
+        "compact_text": "떡갈비두쪽",
+        "status": "kept",
+        "reasons": [
+          "stripped_trailing_price"
+        ],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 2.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "떡갈비한상",
+        "cleaned_text": "떡갈비한상",
+        "compact_text": "떡갈비한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "비빔밥한상",
+        "cleaned_text": "비빔밥한상",
+        "compact_text": "비빔밥한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "제육한상",
+        "cleaned_text": "제육한상",
+        "compact_text": "제육한상",
+        "status": "kept",
+        "reasons": [],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 4.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 4.0,
+          "letter_ratio": 1.0
+        }
+      }
+    ],
+    "dropped": [
+      {
+        "raw_text": "소갈비찜",
+        "cleaned_text": "소갈비찜",
+        "compact_text": "소갈비찜",
+        "status": "dropped",
+        "reasons": [
+          "overlap_lower_quality:contained"
+        ],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 4.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 4.0,
+          "letter_ratio": 1.0
+        }
+      }
+    ]
+  },
   "timings_ms": {
-    "load": 1,
-    "preprocess": 41,
-    "ocr": 65389
+    "image_load": 1,
+    "preprocess": 33,
+    "ocr": 32458,
+    "extractor": 11966,
+    "clean": 0
   },
-  "options": {
-    "min_confidence": 0.5
-  },
-  "result": {
+  "ocr_result": {
     "lines": [
       {
         "text": "제육한상",
@@ -1189,6 +1522,185 @@
       "차돌육개장한상",
       "1.3",
       "차돌박이,고사리,토란대,대파가듬록들어간얼큰한 육개장"
+    ]
+  },
+  "extractor_result": {
+    "items": [
+      {
+        "text": "제육한상 1.2",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "과일을갈아단맛을 내어덜자극적인제육볶음을",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "한상차림 담아낸 한상",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "항정살김치찌개한상",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "항정살이 듣뿐들어가감칠맛있고얼큰한 김치찌개한상",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "떡갈비한상 1.3",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "양념을발라 폰득하고부드럽게 구워낸 떡갈비한상",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "뚝배기불고기한상 1.4",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "간장양념에숙성하여 부드럽고달달한 소불고기를",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "담아낸한상",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "항정수육한상 1.6",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "둥글레초와 한방약재에삶아낸 항정살수육한상",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "뼈를발라내고먹기좋게 썰어내어 남녀노소먹기좋은",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "부드러운소갈비한상",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "비빔밥한상",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "제철나물과바색익힌불고기청매실 고추장을결들인비빔밥",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "계절한상차림",
+        "label": "category_header",
+        "is_menu": false
+      },
+      {
+        "text": "차돌육개장한상",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "차돌박이,고사리,토란대,대파가듬록들어간얼큰한 육개장",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "궁중약선잡채 0.8",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "녹두빈대떡",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "궁중떡볶이",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "김치메밀전병",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "떡갈비 두쪽0.7",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "한쪽0.4",
+        "label": "option_modifier",
+        "is_menu": false
+      },
+      {
+        "text": "소갈비찜 1.5",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "소갈비찜한상 3.4",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "+",
+        "label": "other",
+        "is_menu": false
+      },
+      {
+        "text": "2인상차림 항정김치찌개한상",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "곁들임택1",
+        "label": "option_modifier",
+        "is_menu": false
+      },
+      {
+        "text": "한상도의모든 차림은 주문과동시에 조리됩니다다소시간이걸리는 만큼정성을 다하겠습니다.",
+        "label": "other",
+        "is_menu": false
+      }
+    ],
+    "menu_texts": [
+      "제육한상",
+      "한상차림 담아낸 한상",
+      "항정살김치찌개한상",
+      "떡갈비한상",
+      "뚝배기불고기한상",
+      "담아낸한상",
+      "항정수육한상",
+      "부드러운소갈비한상",
+      "비빔밥한상",
+      "차돌육개장한상",
+      "궁중약선잡채",
+      "녹두빈대떡",
+      "궁중떡볶이",
+      "김치메밀전병",
+      "떡갈비 두쪽0.7",
+      "소갈비찜",
+      "소갈비찜한상",
+      "2인상차림 항정김치찌개한상"
     ]
   }
 }

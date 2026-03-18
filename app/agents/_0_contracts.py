@@ -47,28 +47,57 @@ class OCRMenuJudgeOutput(BaseModel):
     menu_texts: List[str] = Field(default_factory=list, description="메뉴명으로 판정된 텍스트")
 
 
+RiskEvidenceType = Literal["direct", "alias", "menu_prior", "weak_inference", "none"]
+
+
 class AvoidEvidence(BaseModel):
-    ingredient: str = Field(..., description="avoid 리스트에 포함된 재료명")
-    evidence_type: Literal["direct", "common_recipe", "uncertain"] = Field(
-        "uncertain",
-        description="근거 수준: direct/common_recipe/uncertain",
+    ingredient: str = Field(..., description="사용자 표시용 기피 재료명")
+    canonical: str = Field("", description="내부 canonical 기피 재료명")
+    evidence_type: RiskEvidenceType = Field(
+        "none",
+        description="근거 수준: direct/alias/menu_prior/weak_inference/none",
     )
-    note_ko: str = Field("", description="짧은 한국어 근거 메모")
+    evidence_text: Optional[str] = Field(
+        None,
+        description="메뉴 문자열에서 직접 확인된 근거 토큰. 없으면 null",
+    )
+    reason: str = Field("", description="짧은 설명용 근거 메모")
+    confidence: float = Field(0.0, ge=0.0, le=1.0, description="해당 근거의 신뢰도")
+
+
+class RiskSuspect(BaseModel):
+    canonical: str = Field(..., description="내부 canonical 기피 재료명")
+    evidence_type: RiskEvidenceType = Field(
+        "none",
+        description="근거 수준: direct/alias/menu_prior/weak_inference/none",
+    )
+    evidence_text: Optional[str] = Field(
+        None,
+        description="메뉴 문자열에서 직접 확인된 근거 토큰. 없으면 null",
+    )
+    reason: str = Field("", description="짧은 설명용 근거 메모")
+    confidence: float = Field(0.0, ge=0.0, le=1.0, description="해당 suspect의 신뢰도")
 
 
 class RiskItem(BaseModel):
     menu: str = Field(..., description="입력 메뉴명과 동일한 원문")
-    risk: int = Field(50, ge=0, le=100, description="0~100, 높을수록 위험")
-    confidence: float = Field(0.5, ge=0.0, le=1.0, description="0.0~1.0, 높을수록 확신")
+    risk: int = Field(0, ge=0, le=100, description="deprecated placeholder; 최종 risk는 score policy에서 계산")
+    confidence: float = Field(0.0, ge=0.0, le=1.0, description="메뉴 단위 평가 신뢰도")
     suspected_ingredients: List[str] = Field(
-        default_factory=list, description="추정 핵심 성분(최대 3 권장)"
+        default_factory=list,
+        description="하위 호환용 디버그 필드. suspect canonical 표시명을 담을 수 있음",
+    )
+    suspects: List[RiskSuspect] = Field(
+        default_factory=list,
+        description="기피 재료 관련 suspect 목록",
     )
     matched_avoid: List[str] = Field(
-        default_factory=list, description="avoid 리스트와 일치하는 항목만"
+        default_factory=list,
+        description="하위 호환용 표시 필드. suspect canonical을 사용자 표시명으로 변환한 결과",
     )
     avoid_evidence: List[AvoidEvidence] = Field(
         default_factory=list,
-        description="avoid 성분별 근거 목록",
+        description="하위 호환용 근거 목록. suspects를 기반으로 파생된다",
     )
 
 

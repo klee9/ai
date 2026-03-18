@@ -22,7 +22,6 @@ from app.agents._0_contracts import (
     ScorePolicyOutput,
 )
 from app.agents._chat_1_avoid_taker import AvoidIntakeAgent
-from app.agents.extract_agent import MenuExtractAgent
 from app.agents._eval_3_extractor import OCRMenuJudgeAgent
 from app.agents._0_orchestrator import MenuAgentOrchestrator
 from app.agents._eval_2_ocr import OCRAgent
@@ -54,7 +53,6 @@ __all__ = [
     "ScorePolicyOutput",
     "FinalResponse",
     "AvoidIntakeAgent",
-    "MenuExtractAgent",
     "OCRMenuJudgeAgent",
     "RiskAssessAgent",
     "ScorePolicyAgent",
