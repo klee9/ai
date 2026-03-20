@@ -157,7 +157,7 @@ class MenuAgentOrchestrator:
             scored_items.append(it)
 
         # menu는 사용자 언어 표시용으로 로컬라이즈하고, menu_original에는 원문을 유지한다.
-        self._localize_item_menus(scored_items, lang)
+        self._localize_item_menus(scored_items, lang, source_lang=ocr_out.resolved_lang)
         # reason은 ScorePolicy에서 영어로 생성되므로, 최종 언어로 로컬라이즈한다.
         self._localize_item_reasons(scored_items, lang)
 
@@ -278,7 +278,7 @@ class MenuAgentOrchestrator:
             return None
         return aliases.get(key)
 
-    def _localize_item_menus(self, items: List[ScoredItem], lang: str) -> None:
+    def _localize_item_menus(self, items: List[ScoredItem], lang: str, source_lang: str = "auto") -> None:
         target_lang = lang if lang in {"ko", "en", "es"} else "en"
         if not items:
             return
@@ -308,7 +308,7 @@ class MenuAgentOrchestrator:
         try:
             translated = self.translate_only(
                 texts=translate_candidates,
-                source_lang="auto",
+                source_lang=source_lang or "auto",
                 target_lang=target_lang,
             )
             for idx, src in enumerate(translate_candidates):
