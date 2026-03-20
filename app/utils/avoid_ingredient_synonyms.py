@@ -339,6 +339,180 @@ AVOID_INGREDIENT_CATALOG: Dict[str, Dict[str, object]] = {
         "menu_weak_aliases": {"ko": [], "en": []},
         "menu_prior_aliases": {"ko": ["오리탕", "오리백숙", "오리주물럭", "오리불고기", "북경오리", "베이징덕"], "en": ["peking duck"]},
     },
+    "alcohol": {
+        "display": {"ko": "술", "en": "alcohol"},
+        "input_aliases": {
+            "ko": [
+                "술",
+                "알코올",
+                "주류",
+                "와인",
+                "맥주",
+                "소주",
+                "막걸리",
+                "청주",
+                "사케",
+                "위스키",
+                "보드카",
+                "럼",
+                "브랜디",
+                "리큐르",
+                "칵테일",
+                "와인식초",
+                "맛술",
+                "미림",
+                "요리술",
+            ],
+            "en": [
+                "alcohol",
+                "alcoholic drink",
+                "alcoholic beverage",
+                "liquor",
+                "wine",
+                "beer",
+                "sake",
+                "whiskey",
+                "whisky",
+                "vodka",
+                "rum",
+                "brandy",
+                "liqueur",
+                "cocktail",
+                "cooking wine",
+                "rice wine",
+                "mirin",
+            ],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["술", "알코올", "주류", "와인", "맥주", "소주", "막걸리", "청주", "사케", "위스키", "보드카", "럼", "브랜디", "리큐르", "칵테일", "미림", "맛술", "요리술"],
+            "en": ["alcohol", "liquor", "wine", "beer", "sake", "whiskey", "whisky", "vodka", "rum", "brandy", "liqueur", "cocktail", "cooking wine", "rice wine", "mirin"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["와인식초", "플람베"],
+            "en": ["wine vinegar", "flambe", "flambé"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["와인소스", "맥주반죽", "럼케이크", "사케동"],
+            "en": ["wine sauce", "beer batter", "rum cake", "sake don"],
+        },
+    },
+    "caffeine": {
+        "display": {"ko": "카페인", "en": "caffeine"},
+        "input_aliases": {
+            "ko": ["카페인", "커피", "에스프레소", "아메리카노", "콜드브루", "홍차", "녹차", "말차", "마테", "콜라", "에너지드링크", "과라나"],
+            "en": ["caffeine", "coffee", "espresso", "americano", "cold brew", "black tea", "green tea", "matcha", "yerba mate", "cola", "energy drink", "guarana"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["카페인", "커피", "에스프레소", "아메리카노", "콜드브루", "홍차", "녹차", "말차", "마테", "콜라", "에너지드링크", "과라나"],
+            "en": ["caffeine", "coffee", "espresso", "americano", "cold brew", "black tea", "green tea", "matcha", "yerba mate", "cola", "energy drink", "guarana"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["초콜릿", "코코아"],
+            "en": ["chocolate", "cocoa"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["에너지샷", "더블샷커피"],
+            "en": ["energy shot", "double shot coffee"],
+        },
+    },
+    "gelatin": {
+        "display": {"ko": "젤라틴", "en": "gelatin"},
+        "input_aliases": {
+            "ko": ["젤라틴", "젤라틴가루", "명교", "콜라겐", "돈피젤라틴", "우피젤라틴"],
+            "en": ["gelatin", "gelatine", "gelatin powder", "collagen", "pork gelatin", "beef gelatin"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["젤라틴", "젤라틴가루", "명교", "콜라겐", "돈피젤라틴", "우피젤라틴"],
+            "en": ["gelatin", "gelatine", "gelatin powder", "collagen", "pork gelatin", "beef gelatin"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["마시멜로", "젤리", "구미"],
+            "en": ["marshmallow", "jelly", "gummy"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["마시멜로우디저트", "젤리디저트", "판나코타"],
+            "en": ["marshmallow dessert", "jelly dessert", "panna cotta"],
+        },
+    },
+    "honey": {
+        "display": {"ko": "꿀", "en": "honey"},
+        "input_aliases": {
+            "ko": ["꿀", "벌꿀", "아카시아꿀", "사양꿀", "허니"],
+            "en": ["honey", "bee honey", "raw honey", "wild honey"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["꿀", "벌꿀", "허니"],
+            "en": ["honey", "bee honey", "raw honey"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["꿀소스", "허니머스타드"],
+            "en": ["honey sauce", "honey mustard"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["허니버터", "허니글레이즈"],
+            "en": ["honey glaze", "honey butter"],
+        },
+    },
+    "raw egg": {
+        "display": {"ko": "생계란", "en": "raw egg"},
+        "parents": ["egg"],
+        "input_aliases": {
+            "ko": ["생계란", "날계란", "날달걀", "반숙계란", "반숙달걀", "타마고카케고항", "노른자소스"],
+            "en": ["raw egg", "raw eggs", "runny egg", "undercooked egg", "soft-boiled egg", "sunny side egg", "tamago kake gohan"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["생계란", "날계란", "날달걀", "반숙계란", "반숙달걀"],
+            "en": ["raw egg", "raw eggs", "runny egg", "undercooked egg", "soft-boiled egg", "sunny side egg"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["타르타르", "카르보나라"],
+            "en": ["tartare", "carbonara"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["타마고카케고항", "스테이크타르타르"],
+            "en": ["tamago kake gohan", "steak tartare"],
+        },
+    },
+    "raw fish": {
+        "display": {"ko": "생선회", "en": "raw fish"},
+        "parents": ["fish", "shellfish"],
+        "input_aliases": {
+            "ko": ["생선회", "회", "사시미", "카르파초", "세비체", "생해산물", "타르타르", "포케"],
+            "en": ["raw fish", "raw seafood", "sashimi", "carpaccio", "ceviche", "tartare", "poke", "poke bowl"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["생선회", "회", "사시미", "카르파초", "세비체", "생해산물", "타르타르", "포케"],
+            "en": ["raw fish", "raw seafood", "sashimi", "carpaccio", "ceviche", "tartare", "poke", "poke bowl"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["육회", "물회"],
+            "en": ["crudo", "raw platter"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["사시미모둠", "회덮밥", "세비체플래터"],
+            "en": ["sashimi platter", "chirashi", "ceviche mixto"],
+        },
+    },
+    "unpasteurized dairy": {
+        "display": {"ko": "비살균 유제품", "en": "unpasteurized dairy"},
+        "parents": ["dairy"],
+        "input_aliases": {
+            "ko": ["비살균 유제품", "비살균우유", "생유", "비가열치즈", "로우밀크", "로우치즈"],
+            "en": ["unpasteurized dairy", "unpasteurized milk", "raw milk", "raw cheese", "unpasteurized cheese", "raw milk cheese"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["비살균 유제품", "비살균우유", "생유", "비가열치즈", "로우밀크", "로우치즈"],
+            "en": ["unpasteurized dairy", "unpasteurized milk", "raw milk", "raw cheese", "unpasteurized cheese", "raw milk cheese"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["농가치즈", "수제치즈"],
+            "en": ["farmhouse cheese", "artisan cheese"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["로우밀크치즈플래터"],
+            "en": ["raw milk cheese board"],
+        },
+    },
 }
 
 
@@ -836,8 +1010,13 @@ SPANISH_ALIAS_EXTENSIONS: Dict[str, Dict[str, object]] = {
             "puerco",
             "chancho",
             "cochino",
+            "cochinillo",
+            "cochinita",
+            "lechon",
+            "lechón",
             "jamon",
             "jamón",
+            "jamones",
             "jamon serrano",
             "jamón serrano",
             "serrano",
@@ -845,11 +1024,18 @@ SPANISH_ALIAS_EXTENSIONS: Dict[str, Dict[str, object]] = {
             "jamón ibérico",
             "iberico",
             "ibérico",
+            "jamon iberico de bellota",
+            "jamón ibérico de bellota",
             "chorizo",
+            "longaniza",
             "salchichon",
             "salchichón",
             "morcilla",
+            "sobrasada",
+            "embutido",
+            "embutidos",
             "lomo de cerdo",
+            "costilla de cerdo",
             "panceta",
             "tocino",
             "bacon",
@@ -862,6 +1048,14 @@ SPANISH_ALIAS_EXTENSIONS: Dict[str, Dict[str, object]] = {
             "soppressata",
             "lardon",
             "lardón",
+            "secreto iberico",
+            "secreto ibérico",
+            "pluma iberica",
+            "pluma ibérica",
+            "presa iberica",
+            "presa ibérica",
+            "lacon",
+            "lacón",
         ],
         "menu_evidence_aliases": [
             "cerdo",
@@ -869,8 +1063,13 @@ SPANISH_ALIAS_EXTENSIONS: Dict[str, Dict[str, object]] = {
             "puerco",
             "chancho",
             "cochino",
+            "cochinillo",
+            "cochinita",
+            "lechon",
+            "lechón",
             "jamon",
             "jamón",
+            "jamones",
             "jamon serrano",
             "jamón serrano",
             "serrano",
@@ -878,17 +1077,32 @@ SPANISH_ALIAS_EXTENSIONS: Dict[str, Dict[str, object]] = {
             "jamón ibérico",
             "iberico",
             "ibérico",
+            "jamon iberico de bellota",
+            "jamón ibérico de bellota",
             "chorizo",
+            "longaniza",
             "salchichon",
             "salchichón",
             "morcilla",
+            "sobrasada",
+            "embutido",
+            "embutidos",
             "lomo de cerdo",
+            "costilla de cerdo",
             "panceta",
             "tocino",
             "bacon",
             "prosciutto",
             "salami",
             "soppressata",
+            "secreto iberico",
+            "secreto ibérico",
+            "pluma iberica",
+            "pluma ibérica",
+            "presa iberica",
+            "presa ibérica",
+            "lacon",
+            "lacón",
         ],
         "menu_weak_aliases": [
             "jamon cocido",
@@ -897,13 +1111,20 @@ SPANISH_ALIAS_EXTENSIONS: Dict[str, Dict[str, object]] = {
             "jamón curado",
             "grasa de cerdo",
             "caldo de cerdo",
+            "tocineta",
         ],
         "menu_prior_aliases": [
             "caldo gallego",
             "tabla iberica",
+            "tabla ibérica",
             "tabla de serrano",
             "croquetas de jamon",
             "croquetas de jamón",
+            "tabla de embutidos",
+            "fabada",
+            "fabada asturiana",
+            "cochinillo asado",
+            "lechón asado",
         ],
     },
     "chicken": {
@@ -996,6 +1217,356 @@ SPANISH_ALIAS_EXTENSIONS: Dict[str, Dict[str, object]] = {
 }
 
 
+MULTILINGUAL_ALIAS_EXTENSIONS: Dict[str, Dict[str, Dict[str, List[str]]]] = {
+    "egg": {
+        "input_aliases": {
+            "ko": ["난백", "난황", "난백액", "난황액", "계란액", "마요네즈", "마요", "커스터드", "에그샐러드"],
+            "en": ["egg white", "egg whites", "egg yolks", "liquid egg", "mayonnaise", "mayo", "custard", "frittata", "quiche"],
+            "es": ["clara", "claras", "yema", "yemas", "huevo liquido", "huevo líquido", "mayonesa", "flan", "quiche"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["마요네즈", "커스터드"],
+            "en": ["mayonnaise", "mayo", "custard", "aioli", "aioli sauce"],
+            "es": ["mayonesa", "alioli", "salsa alioli", "flan"],
+        },
+    },
+    "dairy": {
+        "input_aliases": {
+            "ko": ["유당", "락토스", "카제인", "유청", "유단백", "요거트", "요구르트", "크림", "휘핑크림", "아이스크림"],
+            "en": ["lactose", "casein", "whey", "milk protein", "yogurt", "yoghurt", "cream", "whipping cream", "ice cream", "half and half"],
+            "es": ["lactosa", "caseina", "suero de leche", "proteina lactea", "proteína láctea", "yogur", "crema", "nata", "helado"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["유제품", "유당", "카제인", "유청", "유단백", "요거트", "요구르트", "크림", "아이스크림"],
+            "en": ["dairy", "lactose", "casein", "whey", "milk protein", "yogurt", "cream", "ice cream"],
+            "es": ["lacteo", "lácteo", "lactosa", "caseina", "caseína", "suero de leche", "yogur", "crema", "helado"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["크림수프", "크림리조또", "치즈플래터", "밀크브레드"],
+            "en": ["cream soup", "cream risotto", "cheese board", "milk bread"],
+            "es": ["sopa cremosa", "risotto cremoso", "tabla de quesos"],
+        },
+    },
+    "milk": {
+        "input_aliases": {
+            "ko": ["우유단백", "우유분말", "유크림", "크림밀크", "탈지분유", "전지분유"],
+            "en": ["milk solids", "milk powder", "milk protein", "dried milk", "skim milk powder", "whole milk powder", "evaporated milk"],
+            "es": ["solidos lacteos", "sólidos lácteos", "leche en polvo", "leche deshidratada", "leche evaporada", "leche semidesnatada"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["밀크폼", "밀크브레드"],
+            "en": ["milk foam", "milky", "milk bread"],
+            "es": ["espuma de leche", "pan de leche"],
+        },
+    },
+    "cheese": {
+        "input_aliases": {
+            "ko": ["브리", "까망베르", "고르곤졸라", "페타", "리코타", "할루미", "에멘탈", "그뤼에르", "블루치즈", "페코리노"],
+            "en": ["brie", "camembert", "gorgonzola", "feta", "ricotta", "halloumi", "emmental", "gruyere", "gruyère", "blue cheese", "pecorino", "goat cheese"],
+            "es": ["brie", "camembert", "gorgonzola", "feta", "ricotta", "halloumi", "emmental", "gruyere", "gruyère", "queso azul", "pecorino", "queso de cabra"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["치즈", "크림치즈", "모짜렐라", "체다", "파르메산", "고르곤졸라", "페타", "리코타", "블루치즈"],
+            "en": ["cheese", "cream cheese", "mozzarella", "cheddar", "parmesan", "gorgonzola", "feta", "ricotta", "blue cheese", "goat cheese"],
+            "es": ["queso", "queso crema", "mozzarella", "cheddar", "parmesano", "manchego", "gorgonzola", "feta", "ricotta", "queso azul", "queso de cabra"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["치즈버거", "치즈오믈렛", "치즈케이크"],
+            "en": ["cheeseburger", "cheese omelet", "cheesecake"],
+            "es": ["hamburguesa con queso", "tarta de queso", "quesadilla"],
+        },
+    },
+    "peanut": {
+        "input_aliases": {
+            "ko": ["땅콩가루", "볶은땅콩", "피넛", "피넛버터", "피넛소스"],
+            "en": ["ground peanut", "roasted peanut", "peanut sauce", "satay peanut sauce", "peanut crumble"],
+            "es": ["cacahuete molido", "mani tostado", "maní tostado", "salsa de cacahuete", "salsa de maní"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["땅콩", "피넛", "땅콩버터", "피넛버터", "땅콩소스", "피넛소스"],
+            "en": ["peanut", "peanuts", "peanut butter", "peanut sauce"],
+            "es": ["cacahuete", "cacahuetes", "mani", "maní", "mantequilla de maní", "salsa de maní"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["땅콩강정", "사테소스"],
+            "en": ["satay", "peanut brittle"],
+            "es": ["salsa satay", "garrapiñada de maní"],
+        },
+    },
+    "tree nut": {
+        "input_aliases": {
+            "ko": ["피칸", "브라질너트", "코코넛", "코코넛가루", "코코넛밀크", "호두분태", "잣가루"],
+            "en": ["pecan", "pecans", "brazil nut", "brazil nuts", "coconut", "coconut milk", "coconut cream", "nut meal", "mixed nuts"],
+            "es": ["pecana", "pecanas", "nuez de brasil", "nuez de pará", "nueces mixtas", "coco", "leche de coco", "crema de coco"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["견과류", "아몬드", "호두", "캐슈넛", "캐슈", "피스타치오", "헤이즐넛", "잣", "마카다미아", "피칸", "브라질너트", "코코넛"],
+            "en": ["tree nut", "tree nuts", "almond", "almonds", "walnut", "walnuts", "cashew", "cashews", "pistachio", "pistachios", "hazelnut", "hazelnuts", "pine nut", "pine nuts", "macadamia", "pecan", "pecans", "brazil nut", "coconut"],
+            "es": ["frutos secos", "almendra", "almendras", "nuez", "nueces", "anacardo", "anacardos", "pistacho", "pistachos", "avellana", "avellanas", "piñon", "piñones", "macadamia", "pecana", "pecanas", "nuez de brasil", "coco"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["견과샐러드", "넛크러스트", "코코넛커리"],
+            "en": ["mixed nut salad", "nut crust", "coconut curry"],
+            "es": ["ensalada de frutos secos", "costra de nueces", "curry de coco"],
+        },
+    },
+    "beef": {
+        "input_aliases": {
+            "ko": ["소고기다짐육", "다진소고기", "육즙스테이크", "햄버그스테이크", "우사골", "사골육수", "비프", "비프스톡", "비프타르타르"],
+            "en": ["ground beef", "beef mince", "minced beef", "ox", "ox tail", "oxtail", "beef shank", "beef stock", "beef broth", "beef tartare", "hamburger steak"],
+            "es": ["carne picada de res", "res molida", "vacuno picado", "buey", "rabo de buey", "caldo de res", "consome de res", "consomé de res", "tartar de res"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["소고기", "쇠고기", "우육", "한우", "육우", "사골", "사골육수", "비프", "다진소고기", "소고기다짐육"],
+            "en": ["beef", "ground beef", "beef mince", "minced beef", "beef stock", "beef broth", "oxtail", "beef tartare", "ox"],
+            "es": ["res", "carne de res", "ternera", "vacuno", "res molida", "carne picada de res", "caldo de res", "consomé de res", "tartar de res"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["함박스테이크", "비프스튜", "우거지해장국", "사골곰탕"],
+            "en": ["beef stew", "hamburger steak", "oxtail soup"],
+            "es": ["estofado de res", "rabo de toro guisado"],
+        },
+    },
+    "pork": {
+        "input_aliases": {
+            "ko": ["통삼겹", "항정덮밥", "돈사태", "돼지사태", "돼지앞다리", "돼지뒷다리", "포크", "포크벨리", "하몽", "잠봉", "초리소", "살라미", "판체타", "관찰레", "모르타델라", "카피콜라", "릴레트"],
+            "en": ["ground pork", "minced pork", "pork shank", "ham hock", "ham", "jamon", "jamón", "chorizo", "salami", "mortadella", "pancetta", "guanciale", "capicola", "lardon", "rillettes", "porchetta", "sausage pork"],
+            "es": ["cerdo picado", "carne molida de cerdo", "jamon iberico", "jamón ibérico", "jamon serrano", "jamón serrano", "paleta iberica", "paleta ibérica", "chorizo", "salchicha de cerdo", "morcilla", "lomo embuchado", "panceta", "tocino", "lacón", "cochinillo", "lechon", "lechón"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["돼지고기", "돈육", "삼겹살", "목살", "항정살", "베이컨", "햄", "족발", "보쌈", "차슈", "돈코츠", "하몽", "잠봉", "초리소", "살라미", "판체타", "관찰레", "모르타델라"],
+            "en": ["pork", "ham", "bacon", "prosciutto", "jamon", "jamón", "chorizo", "salami", "mortadella", "pancetta", "guanciale", "capicola", "char siu", "tonkotsu", "ham hock"],
+            "es": ["cerdo", "carne de cerdo", "jamon", "jamón", "jamones", "jamon serrano", "jamón serrano", "jamon iberico", "jamón ibérico", "chorizo", "salchichon", "salchichón", "morcilla", "sobrasada", "embutidos", "panceta", "tocino", "cochinillo", "lechón", "lacón"],
+        },
+        "menu_weak_aliases": {
+            "ko": ["육수", "돈골육수", "돼지육수"],
+            "en": ["pork stock", "pork broth", "lard"],
+            "es": ["caldo de cerdo", "grasa de cerdo"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["돈코츠라멘", "차슈덮밥", "삼겹수육", "하몽플래터", "초리소플래터"],
+            "en": ["tonkotsu ramen", "char siu rice", "ham platter", "chorizo platter", "porchetta"],
+            "es": ["tabla de serrano", "tabla iberica", "tabla de embutidos", "cochinillo asado", "fabada asturiana"],
+        },
+    },
+    "chicken": {
+        "input_aliases": {
+            "ko": ["닭안창살", "닭특수부위", "닭육개장", "닭죽", "닭튀김", "치킨버거", "치킨패티", "치킨브로스"],
+            "en": ["ground chicken", "minced chicken", "chicken mince", "hen", "rooster", "chicken broth", "chicken bouillon", "chicken patty", "chicken burger", "chicken sausage"],
+            "es": ["pollo picado", "carne picada de pollo", "gallina", "gallo", "caldo de pollo", "consome de pollo", "consomé de pollo", "hamburguesa de pollo", "salchicha de pollo"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["닭", "닭고기", "치킨", "계육", "닭가슴살", "닭다리살", "닭날개", "닭봉", "닭발", "닭근위", "닭염통", "치킨패티", "치킨버거"],
+            "en": ["chicken", "chicken breast", "chicken thigh", "drumstick", "chicken wing", "chicken mince", "ground chicken", "hen", "chicken patty", "chicken burger"],
+            "es": ["pollo", "carne de pollo", "pechuga de pollo", "muslo de pollo", "alita de pollo", "pollo picado", "gallina", "hamburguesa de pollo"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["치킨버거", "치킨샌드위치", "닭죽", "닭육개장"],
+            "en": ["chicken burger", "chicken sandwich", "chicken soup"],
+            "es": ["sandwich de pollo", "sopa de pollo", "katsu de pollo"],
+        },
+    },
+    "alcohol": {
+        "input_aliases": {
+            "ko": ["청하", "소맥", "화이트와인", "레드와인", "샴페인", "리슬링", "샤도네이"],
+            "en": ["champagne", "red wine", "white wine", "sherry", "vermouth", "port wine", "gin", "tequila"],
+            "es": ["alcohol", "vino", "vino tinto", "vino blanco", "cerveza", "licor", "ron", "brandy", "whisky", "vodka", "ginebra", "tequila", "jerez", "vermut", "vino de cocina", "mirin", "sake"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["알코올", "와인", "맥주", "소주", "막걸리", "사케", "위스키", "보드카", "럼", "브랜디", "칵테일"],
+            "en": ["alcohol", "wine", "beer", "liquor", "whiskey", "whisky", "vodka", "rum", "brandy", "cocktail", "sake", "sherry", "vermouth", "tequila", "gin"],
+            "es": ["alcohol", "vino", "cerveza", "licor", "ron", "brandy", "whisky", "vodka", "coctel", "cóctel", "jerez", "tequila", "ginebra", "sake"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["와인소스스테이크", "럼케이크", "맥주튀김"],
+            "en": ["wine reduction", "rum cake", "beer battered fish"],
+            "es": ["salsa al vino", "pastel de ron", "tempura de cerveza"],
+        },
+    },
+    "caffeine": {
+        "input_aliases": {
+            "ko": ["카페라떼", "카푸치노", "모카", "에너지샷"],
+            "en": ["latte", "cappuccino", "mocha", "americano", "energy shot"],
+            "es": ["cafe", "café", "espresso", "cafeina", "cafeína", "te negro", "té negro", "te verde", "té verde", "matcha", "mate", "bebida energetica", "bebida energética", "cola"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["카페인", "커피", "에스프레소", "아메리카노", "콜드브루", "홍차", "녹차", "말차", "콜라", "에너지드링크"],
+            "en": ["caffeine", "coffee", "espresso", "americano", "cold brew", "black tea", "green tea", "matcha", "cola", "energy drink"],
+            "es": ["cafeina", "cafeína", "cafe", "café", "espresso", "te negro", "té negro", "te verde", "té verde", "matcha", "cola", "bebida energética"],
+        },
+    },
+    "gelatin": {
+        "input_aliases": {
+            "ko": [],
+            "en": ["gelatine", "gelatin sheet", "gelatin sheets"],
+            "es": ["gelatina", "gelatina porcina", "gelatina bovina", "grenetina", "colageno", "colágeno"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["젤라틴", "명교", "콜라겐", "돈피젤라틴", "우피젤라틴", "마시멜로"],
+            "en": ["gelatin", "gelatine", "collagen", "marshmallow", "gummy"],
+            "es": ["gelatina", "grenetina", "colageno", "colágeno", "malvavisco", "gomita"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["젤리디저트", "마시멜로디저트"],
+            "en": ["jelly dessert", "gummy candy", "marshmallow dessert"],
+            "es": ["postre de gelatina", "dulce gomoso", "postre con malvavisco"],
+        },
+    },
+    "honey": {
+        "input_aliases": {
+            "ko": ["허니", "허니시럽", "꿀시럽"],
+            "en": ["honey syrup", "honey glaze", "manuka honey"],
+            "es": ["miel", "miel cruda", "jarabe de miel", "glaseado de miel"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["꿀", "벌꿀", "허니", "허니시럽"],
+            "en": ["honey", "honey syrup", "honey glaze", "manuka honey"],
+            "es": ["miel", "jarabe de miel", "glaseado de miel"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["허니버터토스트", "허니갈릭치킨"],
+            "en": ["honey butter toast", "honey garlic chicken"],
+            "es": ["tostada de miel y mantequilla", "pollo miel ajo"],
+        },
+    },
+    "raw egg": {
+        "input_aliases": {
+            "ko": ["날달걀노른자", "날달걀흰자", "온센타마고", "수비드에그"],
+            "en": ["raw yolk", "runny yolk", "onsen egg", "onsen tamago", "soft egg"],
+            "es": ["huevo crudo", "yema cruda", "huevo poco hecho", "huevo semicuajado", "huevo onsen"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["생계란", "날계란", "날달걀", "반숙계란", "반숙달걀", "온센타마고"],
+            "en": ["raw egg", "raw eggs", "runny egg", "runny yolk", "soft-boiled egg", "onsen egg"],
+            "es": ["huevo crudo", "yema cruda", "huevo poco hecho", "huevo semicuajado", "huevo onsen"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["타마고카케고항", "스테이크타르타르"],
+            "en": ["tamago kake gohan", "steak tartare", "beef tartare"],
+            "es": ["steak tartar", "tartar de res"],
+        },
+    },
+    "raw fish": {
+        "input_aliases": {
+            "ko": ["사시미모리아와세", "회덮밥", "연어사시미", "참치사시미"],
+            "en": ["sushi", "nigiri", "chirashi", "raw salmon", "raw tuna", "seafood crudo"],
+            "es": ["pescado crudo", "marisco crudo", "sushi", "sashimi", "ceviche", "carpaccio", "tartar de atun", "tartar de atún"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["생선회", "회", "사시미", "카르파초", "세비체", "타르타르", "포케", "스시", "니기리"],
+            "en": ["raw fish", "raw seafood", "sashimi", "sushi", "nigiri", "carpaccio", "ceviche", "tartare", "poke", "chirashi"],
+            "es": ["pescado crudo", "marisco crudo", "sushi", "sashimi", "carpaccio", "ceviche", "tartar", "poke"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["사시미플래터", "초밥모둠", "포케볼"],
+            "en": ["sashimi platter", "sushi platter", "poke bowl", "ceviche mixto"],
+            "es": ["tabla de sashimi", "tabla de sushi", "ceviche mixto"],
+        },
+    },
+    "unpasteurized dairy": {
+        "input_aliases": {
+            "ko": ["비살균치즈", "생치즈", "로우밀크치즈"],
+            "en": ["raw milk dairy", "farmhouse raw milk cheese", "unpasteurized soft cheese"],
+            "es": ["lacteos no pasteurizados", "lácteos no pasteurizados", "leche cruda", "queso de leche cruda", "queso no pasteurizado"],
+        },
+        "menu_evidence_aliases": {
+            "ko": ["비살균 유제품", "비살균우유", "생유", "비살균치즈", "로우밀크", "로우치즈"],
+            "en": ["unpasteurized dairy", "raw milk", "raw milk cheese", "unpasteurized cheese", "raw cheese"],
+            "es": ["lacteos no pasteurizados", "lácteos no pasteurizados", "leche cruda", "queso no pasteurizado", "queso de leche cruda"],
+        },
+        "menu_prior_aliases": {
+            "ko": ["로우밀크치즈보드"],
+            "en": ["raw milk cheese board"],
+            "es": ["tabla de queso de leche cruda"],
+        },
+    },
+}
+
+
+AVOID_PROFILE_CATALOG: Dict[str, Dict[str, object]] = {
+    "vegan": {
+        "canonicals": ["egg", "raw egg", "dairy", "milk", "cheese", "butter", "beef", "pork", "chicken", "lamb", "duck", "fish", "raw fish", "shellfish", "shrimp", "crab", "honey", "gelatin"],
+        "input_aliases": {
+            "ko": ["비건", "완전채식", "엄격채식", "비거니즘", "식물성식단", "동물성금지"],
+            "en": ["vegan", "strict vegan", "plant based", "plant-based", "no animal products", "animal-free"],
+            "es": ["vegano", "vegana", "veganismo", "a base de plantas", "sin productos animales", "100% vegetal"],
+        },
+    },
+    "vegetarian": {
+        "canonicals": ["beef", "pork", "chicken", "lamb", "duck", "fish", "raw fish", "shellfish", "shrimp", "crab", "gelatin"],
+        "input_aliases": {
+            "ko": ["채식", "채식주의", "베지테리언", "락토오보", "오보락토", "고기금지"],
+            "en": ["vegetarian", "veggie", "lacto-ovo vegetarian", "meatless", "no meat"],
+            "es": ["vegetariano", "vegetariana", "sin carne", "ovolactovegetariano", "ovolactovegetariana"],
+        },
+    },
+    "pescatarian": {
+        "canonicals": ["beef", "pork", "chicken", "lamb", "duck", "gelatin"],
+        "input_aliases": {
+            "ko": ["페스코", "페스코테리언", "페스카테리언", "생선허용채식"],
+            "en": ["pescatarian", "pescetarian", "fish vegetarian"],
+            "es": ["pescetariano", "pescetariana", "pescatariano", "pescatariana"],
+        },
+    },
+    "halal": {
+        "canonicals": ["pork", "alcohol", "gelatin"],
+        "input_aliases": {
+            "ko": ["할랄", "할랄식", "이슬람식", "무슬림식"],
+            "en": ["halal", "halal friendly", "halal-friendly", "muslim friendly"],
+            "es": ["halal", "apto halal", "comida halal"],
+        },
+    },
+    "kosher": {
+        "canonicals": ["pork", "shellfish", "shrimp", "crab"],
+        "input_aliases": {
+            "ko": ["코셔", "코셔식", "유대교식"],
+            "en": ["kosher", "kosher friendly", "kosher-friendly"],
+            "es": ["kosher", "apto kosher", "comida kosher"],
+        },
+    },
+    "pregnancy": {
+        "canonicals": ["raw egg", "raw fish", "unpasteurized dairy", "alcohol", "caffeine"],
+        "input_aliases": {
+            "ko": ["임신", "임산부", "임신중", "임신 중", "임신부", "산모", "태아"],
+            "en": ["pregnancy", "pregnant", "prenatal", "expecting", "pregnancy-safe", "pregnancy safe"],
+            "es": ["embarazo", "embarazada", "prenatal", "seguro en embarazo", "apto para embarazadas"],
+        },
+    },
+    "nut free": {
+        "canonicals": ["peanut", "tree nut"],
+        "input_aliases": {
+            "ko": ["넛프리", "너트프리", "견과류알레르기", "견과류 알레르기", "땅콩알레르기", "땅콩 알레르기", "견과류금지"],
+            "en": ["nut free", "nut-free", "nut allergy", "nut-allergy", "tree nut allergy", "peanut allergy", "no nuts", "without nuts"],
+            "es": ["sin frutos secos", "alergia a frutos secos", "alergia al mani", "alergia al maní", "sin nueces", "libre de nueces"],
+        },
+    },
+    "dairy free": {
+        "canonicals": ["dairy", "milk", "cheese", "butter", "unpasteurized dairy"],
+        "input_aliases": {
+            "ko": ["유제품프리", "유제품 프리", "락토프리", "우유알레르기", "우유 알레르기", "유제품알레르기"],
+            "en": ["dairy free", "dairy-free", "no dairy", "milk free", "milk allergy", "lactose intolerance"],
+            "es": ["sin lacteos", "sin lácteos", "libre de lacteos", "libre de lácteos", "alergia a la leche", "intolerancia a la lactosa"],
+        },
+    },
+    "egg free": {
+        "canonicals": ["egg", "raw egg"],
+        "input_aliases": {
+            "ko": ["계란프리", "계란 프리", "난류알레르기", "달걀알레르기", "계란알레르기"],
+            "en": ["egg free", "egg-free", "egg allergy", "no egg", "no eggs"],
+            "es": ["sin huevo", "libre de huevo", "alergia al huevo"],
+        },
+    },
+    "hindu": {
+        "canonicals": ["beef"],
+        "input_aliases": {
+            "ko": ["힌두", "힌두교", "힌두교식"],
+            "en": ["hindu", "hinduism", "hindu diet"],
+            "es": ["hindu", "hinduismo", "dieta hindu"],
+        },
+    },
+}
+
+
 def _dedupe_localized_terms(values: Iterable[str]) -> List[str]:
     out: List[str] = []
     seen = set()
@@ -1011,20 +1582,24 @@ def _dedupe_localized_terms(values: Iterable[str]) -> List[str]:
     return out
 
 
-def _merge_spanish_terms(meta: Dict[str, object], section: str, additions: Iterable[str]) -> None:
+def _merge_localized_terms(meta: Dict[str, object], section: str, lang: str, additions: Iterable[str]) -> None:
     section_values = meta.get(section, {})
     if not isinstance(section_values, dict):
         section_values = {}
         meta[section] = section_values
 
-    existing = section_values.get("es", [])
+    existing = section_values.get(lang, [])
     current_terms: List[str] = []
     if isinstance(existing, str):
         current_terms = [existing]
     elif isinstance(existing, list):
         current_terms = [term for term in existing if isinstance(term, str)]
     current_terms.extend(additions)
-    section_values["es"] = _dedupe_localized_terms(current_terms)
+    section_values[lang] = _dedupe_localized_terms(current_terms)
+
+
+def _merge_spanish_terms(meta: Dict[str, object], section: str, additions: Iterable[str]) -> None:
+    _merge_localized_terms(meta, section, "es", additions)
 
 
 def _apply_spanish_alias_extensions(catalog: Dict[str, Dict[str, object]]) -> None:
@@ -1047,7 +1622,72 @@ def _apply_spanish_alias_extensions(catalog: Dict[str, Dict[str, object]]) -> No
                 _merge_spanish_terms(meta, section, terms)
 
 
+def _apply_multilingual_alias_extensions(catalog: Dict[str, Dict[str, object]]) -> None:
+    for canonical, extension in MULTILINGUAL_ALIAS_EXTENSIONS.items():
+        meta = catalog.get(canonical)
+        if not isinstance(meta, dict):
+            continue
+
+        display_values = extension.get("display")
+        if isinstance(display_values, dict):
+            display = meta.get("display", {})
+            if not isinstance(display, dict):
+                display = {}
+                meta["display"] = display
+            for lang, value in display_values.items():
+                if isinstance(lang, str) and isinstance(value, str) and value.strip():
+                    display[lang.strip()] = value.strip()
+
+        for section in ("input_aliases", "menu_evidence_aliases", "menu_weak_aliases", "menu_prior_aliases"):
+            section_values = extension.get(section)
+            if not isinstance(section_values, dict):
+                continue
+            for lang, terms in section_values.items():
+                if not isinstance(lang, str):
+                    continue
+                if isinstance(terms, list):
+                    _merge_localized_terms(meta, section, lang.strip(), terms)
+
+
 _apply_spanish_alias_extensions(AVOID_INGREDIENT_CATALOG)
+_apply_multilingual_alias_extensions(AVOID_INGREDIENT_CATALOG)
+
+
+def _build_profile_alias_lookup() -> Dict[str, List[str]]:
+    lookup: Dict[str, List[str]] = {}
+
+    for profile_name, profile_meta in AVOID_PROFILE_CATALOG.items():
+        if not isinstance(profile_meta, dict):
+            continue
+
+        canonicals = profile_meta.get("canonicals", [])
+        normalized_canonicals: List[str] = []
+        if isinstance(canonicals, list):
+            for canonical in canonicals:
+                if not isinstance(canonical, str):
+                    continue
+                cleaned = canonical.strip().casefold()
+                if not cleaned:
+                    continue
+                if cleaned not in AVOID_INGREDIENT_CATALOG:
+                    continue
+                if cleaned not in normalized_canonicals:
+                    normalized_canonicals.append(cleaned)
+        if not normalized_canonicals:
+            continue
+
+        aliases = profile_meta.get("input_aliases", {})
+        if isinstance(aliases, dict):
+            for term in _iter_supported_localized_terms(aliases):
+                key = normalize_ingredient_token(term)
+                if key:
+                    lookup[key] = list(normalized_canonicals)
+
+        profile_key = normalize_ingredient_token(profile_name)
+        if profile_key:
+            lookup[profile_key] = list(normalized_canonicals)
+
+    return lookup
 
 
 def _iter_alias_terms(
@@ -1079,6 +1719,7 @@ def _build_lookup(
 INPUT_ALIAS_LOOKUP = _build_lookup(["display", "input_aliases"])
 MENU_EVIDENCE_LOOKUP = _build_lookup(["display", "menu_evidence_aliases"])
 MENU_ALL_ALIAS_LOOKUP = _build_lookup(["display", "menu_evidence_aliases", "menu_weak_aliases"])
+PROFILE_ALIAS_LOOKUP = _build_profile_alias_lookup()
 
 
 def build_avoid_synonym_lookup() -> Dict[str, str]:
@@ -1263,14 +1904,28 @@ def canonicalize_avoid_ingredients(ingredients: Iterable[str]) -> List[str]:
     canonicalized: List[str] = []
     seen = set()
 
+    def _append_unique(value: str) -> None:
+        cleaned = (value or "").strip().casefold()
+        if not cleaned or cleaned in seen:
+            return
+        seen.add(cleaned)
+        canonicalized.append(cleaned)
+
     for ingredient in ingredients:
         normalized = normalize_ingredient_token(ingredient)
         if not normalized:
             continue
+
+        expanded_canonicals = PROFILE_ALIAS_LOOKUP.get(normalized)
+        if isinstance(expanded_canonicals, list) and expanded_canonicals:
+            for canonical in expanded_canonicals:
+                if isinstance(canonical, str):
+                    _append_unique(canonical)
+            continue
+
         canonical = INPUT_ALIAS_LOOKUP.get(normalized, re.sub(r"\s+", " ", str(ingredient)).strip())
-        if canonical and canonical not in seen:
-            seen.add(canonical)
-            canonicalized.append(canonical)
+        if isinstance(canonical, str) and canonical.strip():
+            _append_unique(canonical)
 
     return canonicalized
 

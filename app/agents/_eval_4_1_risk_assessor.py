@@ -11,6 +11,7 @@ from app.agents._0_contracts import (
 )
 from app.clients.gemma_client import GemmaClient
 from app.utils.avoid_ingredient_synonyms import (
+    build_canonical_display_map,
     canonicalize_avoid_ingredients,
     find_matching_avoid_canonical,
     get_canonical_ingredient,
@@ -108,19 +109,6 @@ class RiskAssessAgent:
     def _clean_optional_text(value, max_len: int = 80):
         cleaned = RiskAssessAgent._clean_text(value, max_len=max_len)
         return cleaned or None
-
-    @staticmethod
-    def _build_canonical_display_map(avoid_terms):
-        display_by_canonical = {}
-        for ingredient in avoid_terms:
-            display_name = RiskAssessAgent._clean_text(ingredient, max_len=80)
-            if not display_name:
-                continue
-            canonical = get_canonical_ingredient(display_name, mode="input") or display_name
-            canonical = canonical.casefold()
-            if canonical not in display_by_canonical:
-                display_by_canonical[canonical] = display_name
-        return display_by_canonical
 
     @staticmethod
     def _normalize_canonical(value, allowed_canonicals):
@@ -306,7 +294,7 @@ class RiskAssessAgent:
         canonical_avoid = canonicalize_avoid_ingredients(avoid)
         canonical_avoid = [item.casefold() for item in canonical_avoid if isinstance(item, str) and item.strip()]
         canonical_avoid = list(dict.fromkeys(canonical_avoid))
-        display_by_canonical = self._build_canonical_display_map(avoid)
+        display_by_canonical = build_canonical_display_map(avoid)
         allowed_avoid_canonicals = set(canonical_avoid)
         ingredient_canonicals = list(dict.fromkeys(self.ALL_INGREDIENT_CANONICALS))
         if not ingredient_canonicals:
