@@ -34,8 +34,13 @@ def build_parser():
         help="기피 재료 목록. 예: --avoid 계란 우유 땅콩",
     )
     parser.add_argument(
+        "--presigned-url",
+        default="",
+        help="bbox 결과를 업로드할 presigned PUT URL(옵션)",
+    )
+    parser.add_argument(
         "--model",
-        default=os.getenv("MODEL_ID", "gemma-3-12b-it"),
+        default=os.getenv("MODEL_ID", "gemma-3-4b-it"),
         help="Gemma 모델 ID",
     )
     parser.add_argument(
@@ -105,6 +110,12 @@ def print_summary(result, args, resolved_image_source: str):
         print(f"reason={result.best.reason}")
     print()
 
+    print("[Top3 BBox]")
+    print(f"url={result.bbox_image_url or '-'}")
+    print(f"local_path={result.bbox_image_local_path or '-'}")
+    print(f"targets={result.bbox_target_menus or []}")
+    print()
+
     print("[Timings ms]")
     for key, value in (result.timings_ms or {}).items():
         print(f"- {key}: {value}")
@@ -127,6 +138,7 @@ def main():
         avoid=args.avoid,
         user_lang=args.user_lang,
         menu_country_code=args.menu_country_code,
+        presigned_url=args.presigned_url,
     )
 
     if args.json:

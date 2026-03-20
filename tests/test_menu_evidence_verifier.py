@@ -109,7 +109,7 @@ class MenuEvidenceVerifierTest(unittest.TestCase):
         self.assertEqual(len(out[0].avoid_evidence), 1)
         self.assertEqual(out[0].avoid_evidence[0].canonical, "dairy")
 
-    def test_family_match_requires_menu_signal_not_just_menu_prior_label(self):
+    def test_family_match_uses_soft_fallback_when_signal_is_weak(self):
         item = RiskItem(
             menu="Crunch Chicken Burger",
             confidence=0.7,
@@ -129,8 +129,10 @@ class MenuEvidenceVerifierTest(unittest.TestCase):
         out = verify_risk_items([item], avoid_terms=["milk"], lang="en")
 
         self.assertEqual(len(out), 1)
-        self.assertEqual(out[0].matched_avoid, [])
-        self.assertEqual(out[0].avoid_evidence, [])
+        self.assertEqual(out[0].matched_avoid, ["milk"])
+        self.assertEqual(len(out[0].avoid_evidence), 1)
+        self.assertEqual(out[0].avoid_evidence[0].evidence_type, "weak_inference")
+        self.assertLessEqual(out[0].avoid_evidence[0].confidence, 0.25)
 
 
 if __name__ == "__main__":

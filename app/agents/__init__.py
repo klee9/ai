@@ -28,6 +28,7 @@ from app.agents._eval_2_ocr import OCRAgent
 from app.agents._eval_1_img_preprocessor import ImagePreprocessAgent
 from app.agents._eval_4_1_risk_assessor import RiskAssessAgent
 from app.agents._eval_4_2_score_policy import ScorePolicyAgent
+from app.agents._eval_5_bbox_highlighter import MenuBBoxHighlighterAgent
 from app.agents._0_translate_agent import TranslateAgent
 
 __all__ = [
@@ -56,6 +57,7 @@ __all__ = [
     "OCRMenuJudgeAgent",
     "RiskAssessAgent",
     "ScorePolicyAgent",
+    "MenuBBoxHighlighterAgent",
     "TranslateAgent",
     "MenuAgentOrchestrator",
     "OCRAgent",

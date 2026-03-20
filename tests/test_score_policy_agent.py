@@ -5,33 +5,30 @@ from app.agents._eval_4_2_score_policy import ScorePolicyAgent
 
 
 class ScorePolicyAgentTest(unittest.TestCase):
-    def test_score_calculation_and_sorting(self):
+    def test_probability_scoring_and_sorting(self):
         agent = ScorePolicyAgent()
         req = ScorePolicyInput(
             risk_items=[
                 RiskItem(
                     menu="A",
-                    risk=20,
                     confidence=1.0,
-                    suspected_ingredients=["x"],
+                    suspected_ingredients=[],
                     matched_avoid=[],
                     avoid_evidence=[],
-                    why_ko="안전",
                 ),
                 RiskItem(
                     menu="B",
-                    risk=10,
-                    confidence=0.5,
-                    suspected_ingredients=["y"],
+                    confidence=0.8,
+                    suspected_ingredients=["egg"],
                     matched_avoid=["egg"],
                     avoid_evidence=[
                         AvoidEvidence(
                             ingredient="egg",
+                            canonical="egg",
                             evidence_type="direct",
-                            note_ko="계란 사용 가능성 높음",
+                            confidence=0.9,
                         )
                     ],
-                    why_ko="주의",
                 ),
             ],
             uncertainty_penalty=40,
@@ -40,58 +37,116 @@ class ScorePolicyAgentTest(unittest.TestCase):
         result = agent.run(req)
 
         self.assertEqual(len(result.items), 2)
-        # A: no-evidence risk=max(uncertainty 45, bounded prior 20)=45 -> 55
-        # B: risk=max(structured 45, prior 10)=45 -> 100-45-20=35
         self.assertEqual(result.items[0].menu, "A")
-        self.assertEqual(result.items[0].menu_original, "A")
-        self.assertEqual(result.items[0].score, 55)
         self.assertEqual(result.items[1].menu, "B")
-        self.assertEqual(result.items[1].menu_original, "B")
-        self.assertEqual(result.items[1].score, 35)
-        self.assertEqual(result.items[1].reason, "Caution: egg (direct evidence)")
+        self.assertGreater(result.items[0].score, result.items[1].score)
+        self.assertIn("Caution:", result.items[1].reason)
+        self.assertIn("p=", result.items[1].reason)
         self.assertIsNotNone(result.best)
         self.assertEqual(result.best.menu, "A")
 
-    def test_reason_language_en(self):
+    def test_no_evidence_still_has_uncertainty_risk(self):
         agent = ScorePolicyAgent()
         req = ScorePolicyInput(
             risk_items=[
                 RiskItem(
-                    menu="B",
-                    risk=10,
-                    confidence=1.0,
-                    suspected_ingredients=[],
-                    matched_avoid=["egg"],
-                    avoid_evidence=[
-                        AvoidEvidence(ingredient="egg", evidence_type="direct", note_ko="")
-                    ],
-                    why_ko="",
-                )
-            ],
-            uncertainty_penalty=40,
-            lang="en",
-        )
-        result = agent.run(req)
-        self.assertIn("Caution", result.items[0].reason)
-
-    def test_no_evidence_uses_conservative_risk(self):
-        agent = ScorePolicyAgent()
-        req = ScorePolicyInput(
-            risk_items=[
-                RiskItem(
-                    menu="C",
-                    risk=90,
+                    menu="Chef Special Set",
                     confidence=1.0,
                     suspected_ingredients=[],
                     matched_avoid=[],
                     avoid_evidence=[],
-                    why_ko="기피 재료 근거 부족",
                 )
             ],
             uncertainty_penalty=40,
         )
+
         result = agent.run(req)
-        self.assertEqual(result.items[0].risk, 70)
+        self.assertGreaterEqual(result.items[0].risk, 8)
+        self.assertLessEqual(result.items[0].risk, 90)
+        self.assertIn("Insufficient avoid-ingredient evidence", result.items[0].reason)
+
+    def test_stronger_evidence_has_higher_risk(self):
+        agent = ScorePolicyAgent()
+        req = ScorePolicyInput(
+            risk_items=[
+                RiskItem(
+                    menu="Weak Dish",
+                    confidence=0.9,
+                    matched_avoid=["egg"],
+                    avoid_evidence=[
+                        AvoidEvidence(
+                            ingredient="egg",
+                            canonical="egg",
+                            evidence_type="weak_inference",
+                            confidence=0.8,
+                        )
+                    ],
+                ),
+                RiskItem(
+                    menu="Direct Dish",
+                    confidence=0.9,
+                    matched_avoid=["egg"],
+                    avoid_evidence=[
+                        AvoidEvidence(
+                            ingredient="egg",
+                            canonical="egg",
+                            evidence_type="direct",
+                            confidence=0.8,
+                            evidence_text="egg",
+                        )
+                    ],
+                ),
+            ],
+            uncertainty_penalty=40,
+        )
+
+        result = agent.run(req)
+        by_menu = {item.menu: item for item in result.items}
+        self.assertGreater(by_menu["Direct Dish"].risk, by_menu["Weak Dish"].risk)
+
+    def test_multiple_ingredients_accumulate_risk(self):
+        agent = ScorePolicyAgent()
+        req = ScorePolicyInput(
+            risk_items=[
+                RiskItem(
+                    menu="Single",
+                    confidence=0.9,
+                    matched_avoid=["egg"],
+                    avoid_evidence=[
+                        AvoidEvidence(
+                            ingredient="egg",
+                            canonical="egg",
+                            evidence_type="alias",
+                            confidence=0.7,
+                        )
+                    ],
+                ),
+                RiskItem(
+                    menu="Multi",
+                    confidence=0.9,
+                    matched_avoid=["egg", "milk"],
+                    avoid_evidence=[
+                        AvoidEvidence(
+                            ingredient="egg",
+                            canonical="egg",
+                            evidence_type="alias",
+                            confidence=0.7,
+                        ),
+                        AvoidEvidence(
+                            ingredient="milk",
+                            canonical="milk",
+                            evidence_type="alias",
+                            confidence=0.7,
+                        ),
+                    ],
+                ),
+            ],
+            uncertainty_penalty=40,
+        )
+
+        result = agent.run(req)
+        by_menu = {item.menu: item for item in result.items}
+        self.assertGreater(by_menu["Multi"].risk, by_menu["Single"].risk)
 
 
 if __name__ == "__main__":

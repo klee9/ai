@@ -28,7 +28,7 @@ def norm(s: str) -> str:
 
 DEFAULT_BATCH_SIZE = 10
 WEAK_INFERENCE_MAX_CONF = 0.45
-MAX_SUSPECTS_PER_ITEM = 10
+MAX_SUSPECTS_PER_ITEM = 5
 SUSPECT_RANK = {
     "direct": 4,
     "alias": 3,
@@ -319,11 +319,12 @@ You are a menu ingredient profiler.
 INPUT
 - Menu items (use ONLY these, do not add/remove): {json.dumps(items, ensure_ascii=False)}
 - Allowed ingredient canonicals (use ONLY these exact canonical strings in output): {json.dumps(ingredient_canonicals, ensure_ascii=False)}
+- User avoid canonicals for this request (prioritize these when selecting suspects): {json.dumps(canonical_avoid, ensure_ascii=False)}
 
 TASK
 For each menu item, infer a broad but plausible ingredient set for common recipes of that dish.
 Include not only core components but also likely base/dairy/grain/sauce/fat ingredients when relevant.
-Do NOT optimize for any user avoid list in this step.
+Prioritize canonicals that are relevant to the user avoid list when plausible.
 Do NOT output a final risk score.
 
 Top-level confidence:
@@ -351,7 +352,8 @@ IMPORTANT
 - Rule 5: If you do not know, prefer suspects: [] or lower confidence. Do not force a match.
 - If there is no plausible relation to the allowed ingredient canonical list, return suspects: [].
 - Do NOT output unrelated canonicals.
-- Keep suspects concise (prefer up to 10 ingredients per menu).
+- Keep suspects concise (prefer up to 5 ingredients per menu).
+- When avoid canonicals are provided, prioritize avoid-related suspects first before generic ingredients.
 - Prefer specific child canonicals over broad parent labels (e.g., milk/cheese/butter > dairy).
 - Do NOT output a final risk score.
 - You must return exactly one output item for each input menu item.

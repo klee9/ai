@@ -13,7 +13,7 @@ class DummyOrchestrator:
         self._result = result
         self._exc = exc
 
-    def run(self, image_url, avoid, user_lang="ko", menu_country_code="AUTO"):
+    def run(self, image_url, avoid, user_lang="ko", menu_country_code="AUTO", presigned_url=""):
         if self._exc is not None:
             raise self._exc
         return self._result

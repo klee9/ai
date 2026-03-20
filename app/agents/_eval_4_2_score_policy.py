@@ -4,8 +4,10 @@ from app.utils.avoid_ingredient_synonyms import get_menu_evidence_catalog, norma
 
 class ScorePolicyAgent:
     """
-    LLM 추론 결과(RiskItem)를 점수화하는 규칙 기반 Agent.
-    점수 계산은 deterministic 하게 유지한다.
+    LLM 추론 결과(RiskItem)를 uncertainty-aware 확률 점수로 변환한다.
+    - evidence별 confidence를 calibration
+    - ingredient 확률을 noisy-or로 합성
+    - 정보 부족 uncertainty를 별도 위험 확률로 결합
     """
 
     EVIDENCE_RANK = {
@@ -15,45 +17,21 @@ class ScorePolicyAgent:
         "weak_inference": 1,
         "none": 0,
     }
-    BASE_RISK_BY_TYPE = {
-        "direct": 100,
-        "alias": 90,
-        "menu_prior": 50,
-        "weak_inference": 28,
-        "none": 0,
+    EVIDENCE_PROB_FACTORS = {
+        "direct": 1.00,
+        "alias": 0.85,
+        "menu_prior": 0.60,
+        "weak_inference": 0.35,
+        "none": 0.15,
     }
     REASON_LABELS = {
         "direct": "direct evidence",
         "alias": "alias hit",
         "menu_prior": "strong menu prior",
         "weak_inference": "weak inference",
-        "none": "no evidence",
+        "none": "unsupported",
     }
-
-    EXTRA_RISK_PER_INGREDIENT = 6
-    EXTRA_RISK_CAP = 12
-    LOW_CONF_RISK_SCALE = 6
-    LOW_CONF_REASON_THRESHOLD = 0.4
-
-    NO_EVIDENCE_BASE = 0
-    NO_EVIDENCE_UNCERTAINTY_SCALE = 36
-    NO_EVIDENCE_SPECIFIC_CONF_FLOOR_WEAK = 0.25
-    NO_EVIDENCE_SPECIFIC_CONF_FLOOR_STRONG = 0.35
-    NO_EVIDENCE_MIN_RISK_STRONG = 10
-    NO_EVIDENCE_MIN_RISK_DEFAULT = 12
-    NO_EVIDENCE_MIN_RISK_NO_SPECIFIC = 16
-    NO_EVIDENCE_MIN_RISK_LOW_CONF = 18
-    NO_EVIDENCE_MIN_RISK_VERY_LOW_CONF = 22
-    NO_EVIDENCE_MIN_RISK_GENERIC_ONLY = 26
-
-    GENERIC_ONLY_BASE_RISK = 30
-    GENERIC_EXTRA_TOKEN_RISK = 5
-    GENERIC_SUFFIX_RISK = 6
-    GENERIC_LOW_CONF_EXTRA_RISK = 8
-    GENERIC_SHORT_TITLE_EXTRA_RISK = 4
-
-    SPECIFICITY_WEAK_BONUS = 6
-    SPECIFICITY_STRONG_BONUS = 12
+    LOW_CONF_REASON_THRESHOLD = 0.25
 
     GENERIC_TITLE_TERMS = (
         "한상",
@@ -74,11 +52,6 @@ class ScorePolicyAgent:
         "combo",
         "chef",
         "chef special",
-        "套餐",
-        "套饭",
-        "推荐",
-        "招牌",
-        "季节",
     )
     SPECIFIC_DISH_TERMS = (
         "찌개",
@@ -117,17 +90,6 @@ class ScorePolicyAgent:
         "bbq",
         "grill",
         "hotpot",
-        "饭",
-        "面",
-        "粉",
-        "汤",
-        "锅",
-        "炒",
-        "拌",
-        "烤",
-        "饺",
-        "饼",
-        "粥",
     )
 
     _MENU_EVIDENCE_CATALOG = get_menu_evidence_catalog()
@@ -146,28 +108,27 @@ class ScorePolicyAgent:
 
         for it in request.risk_items:
             menu_profile = self._build_menu_profile(it)
-            generic_penalty = self._compute_generic_penalty(it, menu_profile)
-            specificity_bonus = self._compute_specificity_bonus(it, menu_profile)
-            display_confidence = self._relevant_confidence(it)
-
-            # 1) 구조화 근거 기반 위험도(규칙)
-            structured_risk = self._structured_risk(it)
-            if not it.avoid_evidence:
-                base_no_evidence_risk = self._no_evidence_risk(
-                    it.confidence,
-                    menu_profile,
-                    request.uncertainty_penalty,
-                )
-                adjusted_risk = base_no_evidence_risk + generic_penalty
-                min_risk = self._minimum_no_evidence_risk(it.confidence, menu_profile)
-                reducible_bonus = max(0, adjusted_risk - min_risk)
-                final_risk = adjusted_risk - min(specificity_bonus, reducible_bonus)
-            else:
-                final_risk = structured_risk
-                final_risk = final_risk + generic_penalty
-
-            final_risk = max(0, min(100, final_risk))
+            evidence_prob, ingredient_probs, top_evidence_by_key, ingredient_name_by_key = (
+                self._risk_probability_from_evidence(it, menu_profile)
+            )
+            uncertainty_prob = self._uncertainty_probability(
+                item=it,
+                menu_profile=menu_profile,
+                uncertainty_penalty=request.uncertainty_penalty,
+                has_evidence=bool(ingredient_probs),
+            )
+            final_risk_prob = self._combine_probabilities([evidence_prob, uncertainty_prob])
+            final_risk = int(max(0, min(100, round(final_risk_prob * 100.0))))
             final_score = int(max(0, min(100, 100 - final_risk)))
+
+            display_confidence = self._relevant_confidence(it) if it.avoid_evidence else self._clamp_confidence(it.confidence)
+            reason = self._build_reason_en(
+                item=it,
+                ingredient_probs=ingredient_probs,
+                top_evidence_by_key=top_evidence_by_key,
+                ingredient_name_by_key=ingredient_name_by_key,
+                uncertainty_prob=uncertainty_prob,
+            )
 
             scored_pairs.append(
                 (
@@ -179,9 +140,7 @@ class ScorePolicyAgent:
                         confidence=display_confidence,
                         matched_avoid=it.matched_avoid,
                         suspected_ingredients=it.suspected_ingredients,
-                        # reason은 영어 canonical 문장으로 먼저 생성하고,
-                        # 최종 언어(localization)는 오케스트레이터에서 처리한다.
-                        reason=self._build_reason_en(it),
+                        reason=reason,
                     ),
                     it,
                 )
@@ -192,90 +151,133 @@ class ScorePolicyAgent:
         best = scored[0] if scored else None
         return ScorePolicyOutput(items=scored, best=best)
 
-    @staticmethod
-    def _structured_risk(item) -> int:
-        per_ingredient = {}
+    @classmethod
+    def _risk_probability_from_evidence(cls, item, menu_profile: dict):
+        per_ingredient_prob = {}
+        top_evidence_by_key = {}
+        ingredient_name_by_key = {}
+
         for ev in item.avoid_evidence:
-            w = ScorePolicyAgent.EVIDENCE_RANK.get(ev.evidence_type, 1)
-            current = per_ingredient.get(ev.canonical or ev.ingredient, 0)
-            # 같은 재료가 중복되면 가장 강한 근거만 반영
-            per_ingredient[ev.canonical or ev.ingredient] = max(current, w)
+            key = normalize_ingredient_token(ev.canonical or ev.ingredient)
+            if not key:
+                continue
 
-        if not per_ingredient:
-            return 0
+            p = cls._calibrate_evidence_probability(ev, menu_profile)
+            if p <= 0.0:
+                continue
 
-        strongest_evidence = ScorePolicyAgent._strongest_evidence(item)
-        strongest_type = strongest_evidence.evidence_type if strongest_evidence else "none"
-        base_risk = ScorePolicyAgent.BASE_RISK_BY_TYPE.get(strongest_type, 0)
+            current = per_ingredient_prob.get(key, 0.0)
+            if p > current:
+                per_ingredient_prob[key] = p
+                top_evidence_by_key[key] = ev
+                ingredient_name_by_key[key] = (ev.ingredient or ev.canonical or key)
 
-        unique_count = len(per_ingredient)
-        additional_ingredient_risk = min(
-            ScorePolicyAgent.EXTRA_RISK_CAP,
-            max(0, unique_count - 1) * ScorePolicyAgent.EXTRA_RISK_PER_INGREDIENT,
-        )
+        risk_prob = cls._combine_probabilities(per_ingredient_prob.values())
+        return risk_prob, per_ingredient_prob, top_evidence_by_key, ingredient_name_by_key
 
-        bounded_conf = ScorePolicyAgent._relevant_confidence(item)
-        low_conf_penalty = int(round((1.0 - bounded_conf) * ScorePolicyAgent.LOW_CONF_RISK_SCALE))
+    @classmethod
+    def _calibrate_evidence_probability(cls, evidence, menu_profile: dict) -> float:
+        evidence_type = str(evidence.evidence_type or "none")
+        type_factor = cls.EVIDENCE_PROB_FACTORS.get(evidence_type, cls.EVIDENCE_PROB_FACTORS["none"])
+        calibrated = cls._clamp_confidence(evidence.confidence) * type_factor
 
-        return int(min(100, base_risk + additional_ingredient_risk + low_conf_penalty))
+        specific_signal_count = int(menu_profile.get("specific_signal_count", 0))
+        if specific_signal_count >= 2:
+            calibrated *= 1.05
+        elif specific_signal_count == 0:
+            calibrated *= 0.90
 
-    @staticmethod
-    def _build_reason_en(item) -> str:
-        if not item.avoid_evidence:
-            return "Insufficient avoid-ingredient evidence"
+        if menu_profile.get("is_generic_only"):
+            if evidence_type in {"menu_prior", "weak_inference", "none"}:
+                calibrated *= 0.85
+        elif menu_profile.get("generic_hits"):
+            if evidence_type in {"menu_prior", "weak_inference", "none"}:
+                calibrated *= 0.93
 
-        top = ScorePolicyAgent._strongest_evidence(item)
-        if top is None:
-            return "Insufficient avoid-ingredient evidence"
-        label = ScorePolicyAgent.REASON_LABELS.get(
-            top.evidence_type,
-            ScorePolicyAgent.REASON_LABELS["weak_inference"],
-        )
+        if evidence_type == "direct" and (evidence.evidence_text or "").strip():
+            calibrated = max(calibrated, 0.65)
+        if evidence_type == "none":
+            calibrated = min(calibrated, 0.18)
 
-        unique_count = len({ev.ingredient for ev in item.avoid_evidence})
-        if unique_count == 1:
-            reason = f"Caution: {top.ingredient} ({label})"
+        return max(0.0, min(0.99, float(calibrated)))
+
+    @classmethod
+    def _uncertainty_probability(
+        cls,
+        item,
+        menu_profile: dict,
+        uncertainty_penalty: int,
+        has_evidence: bool,
+    ) -> float:
+        scale = max(0.0, min(1.0, float(uncertainty_penalty) / 100.0))
+        specific_signal_count = int(menu_profile.get("specific_signal_count", 0))
+        generic_hits_count = len(menu_profile.get("generic_hits", []))
+
+        if has_evidence:
+            relevant_conf = cls._relevant_confidence(item)
+            uncertainty = (1.0 - relevant_conf) * (0.12 + 0.18 * scale)
+            if menu_profile.get("is_generic_only"):
+                uncertainty += 0.08
+            elif generic_hits_count:
+                uncertainty += min(0.06, generic_hits_count * 0.02)
+            return max(0.0, min(0.35, uncertainty))
+
+        menu_conf = cls._clamp_confidence(item.confidence)
+        uncertainty = 0.10 + (1.0 - menu_conf) * (0.30 + 0.40 * scale)
+        if specific_signal_count == 0:
+            uncertainty += 0.08
+        elif specific_signal_count >= 2:
+            uncertainty -= 0.05
         else:
-            reason = f"Caution: {top.ingredient} + {unique_count - 1} more ingredients"
+            uncertainty -= 0.02
 
-        if ScorePolicyAgent._relevant_confidence(item) < ScorePolicyAgent.LOW_CONF_REASON_THRESHOLD:
-            return f"{reason} (low confidence)"
+        if menu_profile.get("is_generic_only"):
+            uncertainty += 0.18
+        elif generic_hits_count:
+            uncertainty += min(0.08, generic_hits_count * 0.03)
+
+        return max(0.08, min(0.90, uncertainty))
+
+    @classmethod
+    def _build_reason_en(
+        cls,
+        item,
+        ingredient_probs: dict,
+        top_evidence_by_key: dict,
+        ingredient_name_by_key: dict,
+        uncertainty_prob: float,
+    ) -> str:
+        if not ingredient_probs:
+            if uncertainty_prob >= 0.45:
+                return "Insufficient avoid-ingredient evidence (high uncertainty)"
+            if uncertainty_prob >= 0.25:
+                return "Insufficient avoid-ingredient evidence (moderate uncertainty)"
+            return "Insufficient avoid-ingredient evidence"
+
+        top_key = max(ingredient_probs, key=ingredient_probs.get)
+        top_prob = ingredient_probs[top_key]
+        top_ev = top_evidence_by_key.get(top_key)
+        top_name = ingredient_name_by_key.get(top_key, top_key)
+        top_type = str(top_ev.evidence_type) if top_ev is not None else "weak_inference"
+        label = cls.REASON_LABELS.get(top_type, cls.REASON_LABELS["weak_inference"])
+
+        unique_count = len(ingredient_probs)
+        if unique_count == 1:
+            reason = f"Caution: {top_name} ({label}, p={top_prob:.2f})"
+        else:
+            reason = f"Caution: {top_name} + {unique_count - 1} more ingredients (max p={top_prob:.2f})"
+
+        if uncertainty_prob >= cls.LOW_CONF_REASON_THRESHOLD:
+            return f"{reason} (uncertain)"
         return reason
 
     @staticmethod
-    def _no_evidence_risk(confidence: float, menu_profile: dict, uncertainty_penalty: int) -> int:
-        # no-evidence는 안전 확정이 아니라 정보 부족 상태로 보고 보수 처리한다.
-        bounded_conf = ScorePolicyAgent._clamp_confidence(confidence)
-        specific_signal_count = int(menu_profile.get("specific_signal_count", 0))
-        if specific_signal_count >= 2:
-            bounded_conf = max(bounded_conf, ScorePolicyAgent.NO_EVIDENCE_SPECIFIC_CONF_FLOOR_STRONG)
-        elif specific_signal_count == 1:
-            bounded_conf = max(bounded_conf, ScorePolicyAgent.NO_EVIDENCE_SPECIFIC_CONF_FLOOR_WEAK)
-
-        uncertainty_scale = max(0, min(100, int(uncertainty_penalty)))
-        return int(
-            round(
-                ScorePolicyAgent.NO_EVIDENCE_BASE
-                + (1.0 - bounded_conf) * uncertainty_scale
-            )
-        )
-
-    @classmethod
-    def _minimum_no_evidence_risk(cls, confidence: float, menu_profile: dict) -> int:
-        bounded_conf = cls._clamp_confidence(confidence)
-        if menu_profile.get("is_generic_only"):
-            return cls.NO_EVIDENCE_MIN_RISK_GENERIC_ONLY
-        if bounded_conf < 0.15:
-            return cls.NO_EVIDENCE_MIN_RISK_VERY_LOW_CONF
-        if bounded_conf < 0.35:
-            return cls.NO_EVIDENCE_MIN_RISK_LOW_CONF
-
-        specific_signal_count = int(menu_profile.get("specific_signal_count", 0))
-        if specific_signal_count >= 2 and bounded_conf >= 0.6:
-            return cls.NO_EVIDENCE_MIN_RISK_STRONG
-        if specific_signal_count == 0:
-            return cls.NO_EVIDENCE_MIN_RISK_NO_SPECIFIC
-        return cls.NO_EVIDENCE_MIN_RISK_DEFAULT
+    def _combine_probabilities(probabilities) -> float:
+        survival = 1.0
+        for p in probabilities:
+            bounded = max(0.0, min(0.999, float(p)))
+            survival *= (1.0 - bounded)
+        return max(0.0, min(0.999, 1.0 - survival))
 
     @staticmethod
     def _strongest_evidence(item):
@@ -283,7 +285,7 @@ class ScorePolicyAgent:
             return None
         return max(
             item.avoid_evidence,
-            key=lambda ev: ScorePolicyAgent.EVIDENCE_RANK.get(ev.evidence_type, 1),
+            key=lambda ev: ScorePolicyAgent.EVIDENCE_RANK.get(ev.evidence_type, 0),
         )
 
     @classmethod
@@ -367,29 +369,3 @@ class ScorePolicyAgent:
             "specific_signal_count": specific_signal_count,
             "is_generic_only": bool(generic_hits) and specific_signal_count == 0,
         }
-
-    @classmethod
-    def _compute_generic_penalty(cls, item, menu_profile: dict) -> int:
-        generic_hits = menu_profile.get("generic_hits", [])
-        if not generic_hits:
-            return 0
-
-        if menu_profile.get("is_generic_only"):
-            penalty = cls.GENERIC_ONLY_BASE_RISK + max(0, len(generic_hits) - 1) * cls.GENERIC_EXTRA_TOKEN_RISK
-            if cls._clamp_confidence(item.confidence) < 0.35:
-                penalty += cls.GENERIC_LOW_CONF_EXTRA_RISK
-            menu_norm = normalize_ingredient_token(item.menu)
-            if menu_norm and len(menu_norm) <= 8:
-                penalty += cls.GENERIC_SHORT_TITLE_EXTRA_RISK
-            return min(45, penalty)
-
-        return min(12, cls.GENERIC_SUFFIX_RISK + max(0, len(generic_hits) - 1) * 2)
-
-    @classmethod
-    def _compute_specificity_bonus(cls, item, menu_profile: dict) -> int:
-        specific_signal_count = int(menu_profile.get("specific_signal_count", 0))
-        if specific_signal_count >= 2:
-            return cls.SPECIFICITY_STRONG_BONUS
-        if specific_signal_count == 1:
-            return cls.SPECIFICITY_WEAK_BONUS
-        return 0

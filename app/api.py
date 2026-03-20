@@ -65,10 +65,14 @@ def preload_ocr_engines():
 
 class RankRequest(BaseModel):
     image_url: str = Field(..., description="메뉴판 이미지 URL")
+    presigned_url: str = Field(
+        "",
+        description="bbox 결과 이미지를 업로드할 presigned PUT URL",
+    )
     avoid: List[str] = Field(default_factory=list, description="기피 재료 리스트")
-    user_lang: str = Field("ko", description="사용자/응답 언어(ko/en/es)")
-    menu_country_code: str = Field(
-        "AUTO",
+    user_lang: Optional[str] = Field(None, description="사용자/응답 언어(ko/en/es)")
+    menu_country_code: Optional[str] = Field(
+        None,
         description="메뉴판 OCR 언어 힌트. 모르면 AUTO",
     )
     # 하위 호환: 기존 필드가 오면 user_lang/menu_country_code로 대체 사용
@@ -100,13 +104,14 @@ def health():
 @app.post("/rank", response_model=FinalResponse)
 def rank(req: RankRequest):
     try:
-        user_lang = (req.user_lang or req.lang or "ko")
-        menu_country_code = (req.menu_country_code or req.country_code or "AUTO")
+        user_lang = ((req.user_lang if req.user_lang is not None else req.lang) or "ko")
+        menu_country_code = ((req.menu_country_code if req.menu_country_code is not None else req.country_code) or "AUTO")
         result = orchestrator.run(
             req.image_url,
             req.avoid,
             user_lang=user_lang,
             menu_country_code=menu_country_code,
+            presigned_url=req.presigned_url,
         )
     except ImageLoadError as exc:
         raise HTTPException(

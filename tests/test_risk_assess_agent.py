@@ -132,7 +132,7 @@ class RiskAssessAgentTest(unittest.TestCase):
         self.assertEqual(result.items[0].matched_avoid, ["milk"])
         self.assertEqual(result.items[0].avoid_evidence[0].canonical, "cheese")
 
-    def test_caps_suspects_to_ten_items(self):
+    def test_caps_suspects_to_five_items(self):
         fake = FakeGemma(
             """
             {
@@ -165,7 +165,7 @@ class RiskAssessAgentTest(unittest.TestCase):
         result = agent.run(req)
 
         self.assertEqual(len(result.items), 1)
-        self.assertEqual(len(result.items[0].suspected_ingredients), 10)
+        self.assertEqual(len(result.items[0].suspected_ingredients), 5)
 
     def test_fills_missing_menu_items_with_fallback_item(self):
         fake = FakeGemma(

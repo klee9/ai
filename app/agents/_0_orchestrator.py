@@ -17,6 +17,7 @@ from app.agents._eval_2_ocr import OCRAgent
 from app.agents._eval_1_img_preprocessor import ImagePreprocessAgent
 from app.agents._eval_4_1_risk_assessor import RiskAssessAgent
 from app.agents._eval_4_2_score_policy import ScorePolicyAgent
+from app.agents._eval_5_bbox_highlighter import MenuBBoxHighlighterAgent
 from app.agents._0_translate_agent import TranslateAgent
 from app.clients.gemma_client import GemmaClient
 from app.utils.image_io import load_image
@@ -38,6 +39,7 @@ class MenuAgentOrchestrator:
         self.preprocess_agent = ImagePreprocessAgent()
         self.risk_assess_agent = RiskAssessAgent(gemma)
         self.score_policy_agent = ScorePolicyAgent()
+        self.bbox_agent = MenuBBoxHighlighterAgent()
         self.avoid_intake_agent = AvoidIntakeAgent(gemma)
         self.translate_agent = TranslateAgent(gemma)
 
@@ -47,6 +49,7 @@ class MenuAgentOrchestrator:
         avoid: List[str],
         user_lang: str = "ko",
         menu_country_code: str = "AUTO",
+        presigned_url: str = "",
     ) -> FinalResponse:
         requested_user_lang = (user_lang or "ko").strip().lower()
         lang = requested_user_lang if requested_user_lang in {"ko", "en", "es"} else "ko"
@@ -94,11 +97,15 @@ class MenuAgentOrchestrator:
             timings_ms["risk_assess"] = 0
             timings_ms["risk_verify"] = 0
             timings_ms["score_policy"] = 0
+            timings_ms["bbox"] = 0
             timings_ms["total"] = self._elapsed_ms(t_total)
             return FinalResponse(
                 items_extracted=[],
                 items=[],
                 best=None,
+                bbox_image_url="",
+                bbox_image_local_path="",
+                bbox_target_menus=[],
                 timings_ms=timings_ms,
                 output_lang=lang,
                 menu_country_code=resolved_menu_country_code,
@@ -149,6 +156,26 @@ class MenuAgentOrchestrator:
         # reason은 ScorePolicy에서 영어로 생성되므로, 최종 언어로 로컬라이즈한다.
         self._localize_item_reasons(scored_items, lang)
 
+        # 4) Top-3 메뉴 bounding box 시각화 + presigned URL 생성
+        t_bbox = time.perf_counter()
+        bbox_target_menus = self._pick_top_bbox_targets(scored_items, top_k=3)
+        bbox_image_url = ""
+        bbox_image_local_path = ""
+        if bbox_target_menus:
+            try:
+                bbox_image_url, matched_targets, bbox_image_local_path = self.bbox_agent.run(
+                    image_bytes=raw_data,
+                    targets=bbox_target_menus,
+                    top_k=3,
+                    upload_presigned_url=(presigned_url or "").strip(),
+                )
+                if matched_targets:
+                    bbox_target_menus = matched_targets
+            except Exception:
+                # bbox 생성/업로드 실패는 메인 랭킹 응답을 깨지 않도록 삼킨다.
+                bbox_image_url = ""
+        timings_ms["bbox"] = self._elapsed_ms(t_bbox)
+
         # best는 정렬된 리스트의 첫 항목을 사용해 reason 번역 결과와 일치시킨다.
         best = scored_items[0] if scored_items else None
         timings_ms["total"] = self._elapsed_ms(t_total)
@@ -157,6 +184,9 @@ class MenuAgentOrchestrator:
             items_extracted=extracted.items,
             items=scored_items,
             best=best,
+            bbox_image_url=bbox_image_url,
+            bbox_image_local_path=bbox_image_local_path,
+            bbox_target_menus=bbox_target_menus,
             timings_ms=timings_ms,
             output_lang=lang,
             menu_country_code=resolved_menu_country_code,
@@ -193,6 +223,23 @@ class MenuAgentOrchestrator:
         if scored_items:
             return scored_items[0]
         return None
+
+    @staticmethod
+    def _pick_top_bbox_targets(items: List[ScoredItem], top_k: int = 3) -> List[str]:
+        out: List[str] = []
+        seen = set()
+        for item in items:
+            candidate = (item.menu_original or item.menu or "").strip()
+            if not candidate:
+                continue
+            key = candidate.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(candidate)
+            if len(out) >= max(1, int(top_k)):
+                break
+        return out
 
     @staticmethod
     def _elapsed_ms(start_time: float) -> int:

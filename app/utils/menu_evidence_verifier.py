@@ -16,6 +16,9 @@ from app.utils.avoid_ingredient_synonyms import (
 
 WEAK_INFERENCE_MAX_CONFIDENCE = 0.45
 RELATION_FALLBACK_MIN_CONFIDENCE = 0.6
+SOFT_FALLBACK_MIN_INPUT_CONFIDENCE = 0.35
+SOFT_FALLBACK_SCALE = 0.45
+SOFT_FALLBACK_MAX_CONFIDENCE = 0.25
 EVIDENCE_RANK = {
     "direct": 4,
     "alias": 3,
@@ -268,6 +271,38 @@ def _fallback_verify_by_relation(
     )
 
 
+def _soft_fallback_verify(suspect: RiskSuspect) -> RiskSuspect | None:
+    """
+    메뉴 텍스트 신호가 부족해 strict verification을 통과하지 못해도,
+    LLM이 준 중간 이상 confidence는 낮은 가중치 weak 추론으로 보존한다.
+    """
+    canonical = (suspect.canonical or "").strip().casefold()
+    if not canonical:
+        return None
+
+    base_conf = float(max(0.0, min(1.0, suspect.confidence)))
+    if base_conf < SOFT_FALLBACK_MIN_INPUT_CONFIDENCE:
+        return None
+
+    softened_conf = min(
+        SOFT_FALLBACK_MAX_CONFIDENCE,
+        max(0.08, base_conf * SOFT_FALLBACK_SCALE),
+    )
+    reason = (suspect.reason or "").strip()
+    if reason:
+        reason = f"{reason} (soft fallback)"
+    else:
+        reason = "soft fallback from model prior"
+
+    return RiskSuspect(
+        canonical=canonical,
+        evidence_type="weak_inference",
+        evidence_text=None,
+        reason=reason,
+        confidence=softened_conf,
+    )
+
+
 def _detect_strong_menu_canonicals(menu_name: str, evidence_catalog: dict) -> set[str]:
     strong_canonicals: set[str] = set()
     for canonical, entry in evidence_catalog.items():
@@ -300,11 +335,23 @@ def _resolve_canonical_conflicts(
             suspect.evidence_type == "weak_inference"
             and suspect.canonical not in strong_menu_canonicals
         ):
-            # exact 약한 추론은 메뉴의 strong 시그널이 없으면 제거하되,
-            # 계열 매칭(예: dairy -> milk)으로 확장된 보수 매칭은 유지한다.
+            # 이전에는 exact 약한 추론을 제거했지만, soft calibration 정책에서는
+            # 낮은 confidence로 보존해 점수 단계에서 확률적으로 반영한다.
             matched_norm = (matched_canonical or "").strip().casefold()
             suspect_norm = (suspect.canonical or "").strip().casefold()
             if matched_norm == suspect_norm:
+                filtered.append(
+                    (
+                        matched_canonical,
+                        RiskSuspect(
+                            canonical=suspect.canonical,
+                            evidence_type="weak_inference",
+                            evidence_text=None,
+                            reason=suspect.reason,
+                            confidence=min(suspect.confidence, SOFT_FALLBACK_MAX_CONFIDENCE),
+                        ),
+                    )
+                )
                 continue
         filtered.append((matched_canonical, suspect))
     return filtered
@@ -414,6 +461,8 @@ def verify_risk_items(risk_items: List[RiskItem], avoid_terms: List[str], lang: 
                     matched_avoid_canonical,
                     evidence_catalog,
                 )
+            if verified is None:
+                verified = _soft_fallback_verify(suspect)
             if verified is not None:
                 verified_pairs.append((matched_avoid_canonical, verified))
 

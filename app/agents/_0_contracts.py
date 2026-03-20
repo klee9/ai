@@ -151,6 +151,9 @@ class FinalResponse(BaseModel):
     items_extracted: List[str] = Field(default_factory=list)
     items: List[ScoredItem] = Field(default_factory=list)
     best: Optional[ScoredItem] = None
+    bbox_image_url: str = Field("", description="점수 상위 메뉴 bounding box 이미지 presigned URL")
+    bbox_image_local_path: str = Field("", description="점수 상위 메뉴 bounding box 로컬 저장 경로")
+    bbox_target_menus: List[str] = Field(default_factory=list, description="bounding box 대상으로 사용된 상위 메뉴명")
     timings_ms: Dict[str, int] = Field(default_factory=dict)
     output_lang: str = Field("ko", description="최종 사용자 표시/응답 언어")
     menu_country_code: str = Field("", description="OCR로 추정한 메뉴판 국가 코드")
