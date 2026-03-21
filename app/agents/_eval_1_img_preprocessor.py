@@ -9,7 +9,7 @@ import cv2
 class ImagePreprocessAgent:
     """
     메뉴판 이미지 전처리 최소 파이프라인:
-    decode -> perspective correction -> illumination flatten -> grayscale -> CLAHE
+    decode -> optional perspective correction
     """
 
     def __init__(
@@ -34,28 +34,22 @@ class ImagePreprocessAgent:
         if image is None:
             return data, normalized_mime
 
+        transformed = False
+
         # 1) 문서 사각형 검출 시에만 원근 보정
         if self.enable_perspective:
             quad = self._detect_document_quad(image)
             if quad is not None:
                 image = self._warp_from_quad(image, quad)
-
-        # 2) 조명 편차 평탄화
-        flat = self._flatten_illumination(image)
-
-        # 3) grayscale
-        gray = self._to_grayscale(flat)
-
-        # 4) CLAHE
-        enhanced = self._apply_clahe(gray)
-
-        # 후속 입력 호환을 위해 3채널로 맞춘다.
-        out_img = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)
+                transformed = True
 
         if save_path:
-            self._save_local_image(out_img, save_path)
+            self._save_local_image(image, save_path)
 
-        encoded = self._encode_image(out_img, normalized_mime)
+        if not transformed:
+            return data, normalized_mime
+
+        encoded = self._encode_image(image, normalized_mime)
         if encoded is None:
             return data, normalized_mime
         return encoded, normalized_mime

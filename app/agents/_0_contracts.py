@@ -4,7 +4,7 @@ from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel, Field
 
 
-SupportedLang = Literal["ko", "en", "cn", ]
+SupportedLang = Literal["ko", "en", "es"]
 
 
 class ExtractInput(BaseModel):
@@ -26,11 +26,26 @@ class OCRLine(BaseModel):
 
 class OCROptions(BaseModel):
     min_confidence: float = Field(0.5, ge=0.0, le=1.0, description="최소 신뢰도 필터")
+    include_bbox: bool = Field(False, description="OCR 결과에 bbox를 포함할지 여부")
+
+
+class OCRLanguageCandidate(BaseModel):
+    lang: str = Field("", description="OCR 후보 언어 코드")
+    score: float = Field(0.0, description="자동 언어 감지 점수")
+    line_count: int = Field(0, ge=0, description="후보 OCR에서 살아남은 라인 수")
+    avg_confidence: float = Field(0.0, ge=0.0, le=1.0, description="후보 OCR 평균 confidence")
+    script_ratio: float = Field(0.0, ge=0.0, le=1.0, description="해당 언어 스크립트 적합도")
 
 
 class OCROutput(BaseModel):
     lines: List[OCRLine] = Field(default_factory=list, description="OCR 라인 결과")
     texts: List[str] = Field(default_factory=list, description="OCR 라인 텍스트만 추출한 결과")
+    resolved_lang: str = Field("", description="실제 OCR에 사용된 언어 코드")
+    lang_detection_source: str = Field("", description="언어 결정 방식(auto/manual)")
+    lang_detection_candidates: List[OCRLanguageCandidate] = Field(
+        default_factory=list,
+        description="자동 감지 시 후보 언어 점수 목록",
+    )
 
 
 class OCRTextLabel(BaseModel):
@@ -47,28 +62,58 @@ class OCRMenuJudgeOutput(BaseModel):
     menu_texts: List[str] = Field(default_factory=list, description="메뉴명으로 판정된 텍스트")
 
 
+RiskEvidenceType = Literal["direct", "alias", "menu_prior", "weak_inference", "none"]
+
+
 class AvoidEvidence(BaseModel):
-    ingredient: str = Field(..., description="avoid 리스트에 포함된 재료명")
-    evidence_type: Literal["direct", "common_recipe", "uncertain"] = Field(
-        "uncertain",
-        description="근거 수준: direct/common_recipe/uncertain",
+    ingredient: str = Field(..., description="사용자 표시용 기피 재료명")
+    canonical: str = Field("", description="내부 canonical 기피 재료명")
+    evidence_type: RiskEvidenceType = Field(
+        "none",
+        description="근거 수준: direct/alias/menu_prior/weak_inference/none",
     )
-    note_ko: str = Field("", description="짧은 한국어 근거 메모")
+    evidence_text: Optional[str] = Field(
+        None,
+        description="메뉴 문자열에서 직접 확인된 근거 토큰. 없으면 null",
+    )
+    reason: str = Field("", description="짧은 설명용 근거 메모")
+    confidence: float = Field(0.0, ge=0.0, le=1.0, description="해당 근거의 신뢰도")
+
+
+class RiskSuspect(BaseModel):
+    canonical: str = Field(..., description="내부 canonical 기피 재료명")
+    evidence_type: RiskEvidenceType = Field(
+        "none",
+        description="근거 수준: direct/alias/menu_prior/weak_inference/none",
+    )
+    evidence_text: Optional[str] = Field(
+        None,
+        description="메뉴 문자열에서 직접 확인된 근거 토큰. 없으면 null",
+    )
+    reason: str = Field("", description="짧은 설명용 근거 메모")
+    confidence: float = Field(0.0, ge=0.0, le=1.0, description="해당 suspect의 신뢰도")
 
 
 class RiskItem(BaseModel):
     menu: str = Field(..., description="입력 메뉴명과 동일한 원문")
-    risk: int = Field(50, ge=0, le=100, description="0~100, 높을수록 위험")
-    confidence: float = Field(0.5, ge=0.0, le=1.0, description="0.0~1.0, 높을수록 확신")
+    menu_original: str = Field("", description="추론/검증에 사용할 불변 원문 메뉴명")
+    risk: int = Field(0, ge=0, le=100, description="deprecated placeholder; 최종 risk는 score policy에서 계산")
+    confidence: float = Field(0.0, ge=0.0, le=1.0, description="메뉴 단위 평가 신뢰도")
     suspected_ingredients: List[str] = Field(
-        default_factory=list, description="추정 핵심 성분(최대 3 권장)"
+        default_factory=list,
+        description="메뉴명/기피 추정에서 읽힌 재료 cue의 표시명 목록",
+    )
+    suspects: List[RiskSuspect] = Field(
+        default_factory=list,
+        description="기피 재료 관련 suspect 목록",
     )
     matched_avoid: List[str] = Field(
-        default_factory=list, description="avoid 리스트와 일치하는 항목만"
+        default_factory=list,
+        description="하위 호환용 표시 필드. suspect canonical을 사용자 표시명으로 변환한 결과",
     )
     avoid_evidence: List[AvoidEvidence] = Field(
         default_factory=list,
-        description="avoid 성분별 근거 목록",
+        description="하위 호환용 근거 목록. suspects를 기반으로 파생된다",
     )
 
 
@@ -107,7 +152,14 @@ class FinalResponse(BaseModel):
     items_extracted: List[str] = Field(default_factory=list)
     items: List[ScoredItem] = Field(default_factory=list)
     best: Optional[ScoredItem] = None
+    bbox_image_url: str = Field("", description="점수 상위 메뉴 bounding box 이미지 presigned URL")
+    bbox_image_local_path: str = Field("", description="점수 상위 메뉴 bounding box 로컬 저장 경로")
+    bbox_target_menus: List[str] = Field(default_factory=list, description="bounding box 대상으로 사용된 상위 메뉴명")
     timings_ms: Dict[str, int] = Field(default_factory=dict)
+    output_lang: str = Field("ko", description="최종 사용자 표시/응답 언어")
+    menu_country_code: str = Field("", description="OCR로 추정한 메뉴판 국가 코드")
+    menu_ocr_lang: str = Field("", description="실제 OCR에 사용된 언어 코드")
+    menu_ocr_lang_source: str = Field("", description="OCR 언어 결정 방식(auto/manual)")
 
 
 class TranslateInput(BaseModel):

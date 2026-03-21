@@ -1,234 +1,343 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional
+import base64
+import os
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-import cv2
-import numpy as np
+import requests
 
-from app.agents._0_contracts import OCRLine, OCROptions, OCROutput
+from app.agents._0_contracts import OCRLanguageCandidate, OCRLine, OCROptions, OCROutput
 
 
 class OCRAgent:
-    """PaddleOCR text extractor (CPU baseline)."""
+    """Google Vision OCR extractor."""
+
+    SUPPORTED_OCR_LANGS: Tuple[str, ...] = ("korean", "en", "es")
+    DEFAULT_AUTO_LANGS: Tuple[str, ...] = SUPPORTED_OCR_LANGS
+    CJK_LANGS = {"korean"}
+    SPANISH_HINT_CHARS = set("áéíóúüñÁÉÍÓÚÜÑ¿¡")
 
     def __init__(
         self,
-        menu_country_code: str = "KR",
+        menu_country_code: Optional[str] = "AUTO",
         ocr_lang_override: Optional[str] = None,
-        text_det_limit_side_len: int = 1216,
-        text_recognition_batch_size: int = 4,
-        cpu_threads: int = 6,
-        det_model_name: str = "PP-OCRv5_mobile_det",
+        ocr_backend: Optional[str] = None,  # 하위 호환용(무시)
+        text_det_limit_side_len: int = 1216,  # 하위 호환용(무시)
+        text_recognition_batch_size: int = 4,  # 하위 호환용(무시)
+        cpu_threads: int = 6,  # 하위 호환용(무시)
+        det_model_name: str = "",  # 하위 호환용(무시)
+        probe_languages: Optional[Sequence[str]] = None,  # 하위 호환용
+        probe_text_det_limit_side_len: int = 512,  # 하위 호환용(무시)
+        probe_text_recognition_batch_size: int = 8,  # 하위 호환용(무시)
+        probe_cpu_threads: int = 4,  # 하위 호환용(무시)
+        probe_image_max_side: int = 960,  # 하위 호환용(무시)
+        probe_center_crop_ratio: float = 0.72,  # 하위 호환용(무시)
+        probe_large_image_threshold: int = 1800,  # 하위 호환용(무시)
+        probe_refine_top_k: int = 2,  # 하위 호환용(무시)
+        probe_early_exit_score_gap: float = 0.12,  # 하위 호환용(무시)
+        probe_early_exit_min_score: float = 0.72,  # 하위 호환용(무시)
+        probe_early_exit_min_script_ratio: float = 0.6,  # 하위 호환용(무시)
     ):
-        self.lang = self._resolve_lang(menu_country_code=menu_country_code, ocr_lang_override=ocr_lang_override)
-        self.text_det_limit_side_len = max(256, int(text_det_limit_side_len))
-        self.text_recognition_batch_size = max(1, int(text_recognition_batch_size))
-        self.cpu_threads = max(1, int(cpu_threads))
-        self.det_model_name = (det_model_name or "PP-OCRv5_mobile_det").strip()
-        self._ocr_engine = None
+        _ = (
+            ocr_backend,
+            text_det_limit_side_len,
+            text_recognition_batch_size,
+            cpu_threads,
+            det_model_name,
+            probe_text_det_limit_side_len,
+            probe_text_recognition_batch_size,
+            probe_cpu_threads,
+            probe_image_max_side,
+            probe_center_crop_ratio,
+            probe_large_image_threshold,
+            probe_refine_top_k,
+            probe_early_exit_score_gap,
+            probe_early_exit_min_score,
+            probe_early_exit_min_script_ratio,
+        )
+        resolved_lang = self._resolve_lang(menu_country_code=menu_country_code, ocr_lang_override=ocr_lang_override)
+        self.requested_lang = resolved_lang
+        self.lang = resolved_lang or "auto"
+        self.lang_source = "manual" if resolved_lang else "auto"
+        self.probe_languages = self._normalize_probe_languages(probe_languages)
+        self.vision_api_key = (
+            os.getenv("GOOGLE_VISION_API_KEY")
+            or os.getenv("GOOGLE_API_KEY")
+            or ""
+        ).strip()
+        self.request_type = (os.getenv("OCR_VISION_REQUEST_TYPE") or "DOCUMENT_TEXT_DETECTION").strip().upper()
+        self.request_timeout_sec = max(5.0, float(os.getenv("OCR_VISION_TIMEOUT_SEC", "25") or "25"))
+        self.last_detection_candidates: List[OCRLanguageCandidate] = []
+        self.last_resolved_lang = self.lang
+        self.last_lang_source = self.lang_source
 
     def run(self, image_bytes: bytes, options: Optional[OCROptions] = None) -> OCROutput:
         opts = options or OCROptions()
-        image = self._decode_image(image_bytes)
-        if image is None:
-            return OCROutput(lines=[], texts=[])
+        if not image_bytes:
+            return OCROutput(lines=[], texts=[], resolved_lang="", lang_detection_source="")
+        if not self.vision_api_key:
+            raise RuntimeError("Google Vision API key is required. Set GOOGLE_VISION_API_KEY (or GOOGLE_API_KEY).")
 
-        raw = self._get_ocr_engine().ocr(image)
-        lines = self._parse_lines(raw)
-        lines = [
-            OCRLine(text=ln.text.strip(), confidence=ln.confidence, bbox=ln.bbox)
-            for ln in lines
-            if ln.text and ln.text.strip() and ln.confidence >= opts.min_confidence
-        ]
-        lines.sort(key=lambda x: (self._top_y(x.bbox), self._left_x(x.bbox)))
-        return OCROutput(lines=lines, texts=[ln.text for ln in lines])
+        data = self._predict(image_bytes)
+        lines, locale = self._parse_vision_lines(data)
+        lines = self._filter_and_sort_lines(
+            lines,
+            min_confidence=opts.min_confidence,
+            include_bbox=bool(opts.include_bbox),
+        )
+        resolved_lang, lang_source = self._resolve_run_lang(locale)
+
+        self.lang = resolved_lang
+        self.lang_source = lang_source
+        self.last_resolved_lang = resolved_lang
+        self.last_lang_source = lang_source
+        self.last_detection_candidates = []
+
+        return OCROutput(
+            lines=lines,
+            texts=[ln.text for ln in lines],
+            resolved_lang=resolved_lang,
+            lang_detection_source=lang_source,
+            lang_detection_candidates=[],
+        )
 
     def run_from_file(self, image_path: str, options: Optional[OCROptions] = None) -> OCROutput:
         with open(image_path, "rb") as f:
             return self.run(f.read(), options=options)
 
-    def _get_ocr_engine(self):
-        if self._ocr_engine is not None:
-            return self._ocr_engine
+    def _resolve_run_lang(self, locale: str) -> Tuple[str, str]:
+        if self.requested_lang:
+            return self.requested_lang, "manual"
 
-        try:
-            from paddleocr import PaddleOCR
-        except Exception as exc:
-            raise RuntimeError(
-                "paddleocr가 설치되지 않았습니다. `pip install paddleocr paddlepaddle` 후 다시 시도하세요."
-            ) from exc
+        prefix = (locale or "").strip().lower().split("-", 1)[0]
+        mapped = {
+            "ko": "korean",
+            "en": "en",
+            "es": "es",
+        }.get(prefix, "")
+        if mapped:
+            return mapped, "vision_locale"
+        return "en", "fallback"
 
-        kwargs_v1 = {
-            "lang": self.lang,
-            "use_doc_orientation_classify": False,
-            "use_doc_unwarping": False,
-            "use_textline_orientation": False,
-            "text_det_limit_side_len": self.text_det_limit_side_len,
-            "text_recognition_batch_size": self.text_recognition_batch_size,
-            "device": "cpu",
-            "enable_mkldnn": True,
-            "cpu_threads": self.cpu_threads,
+    def _predict(self, image_bytes: bytes) -> Dict[str, Any]:
+        content = base64.b64encode(image_bytes).decode("utf-8")
+        url = f"https://vision.googleapis.com/v1/images:annotate?key={self.vision_api_key}"
+        payload = {
+            "requests": [
+                {
+                    "image": {"content": content},
+                    "features": [{"type": self.request_type}],
+                }
+            ]
         }
-        if self.lang in {"en", "ch", "chinese_cht"} and self.det_model_name:
-            kwargs_v1["text_detection_model_name"] = self.det_model_name
+        response = requests.post(url, json=payload, timeout=self.request_timeout_sec)
+        response.raise_for_status()
+        data = response.json() if response.content else {}
+        if not isinstance(data, dict):
+            return {}
+        return data
 
-        kwargs_v2 = {
-            "lang": self.lang,
-            "det_limit_side_len": self.text_det_limit_side_len,
-            "rec_batch_num": self.text_recognition_batch_size,
-            "use_gpu": False,
-            "enable_mkldnn": True,
-            "cpu_threads": self.cpu_threads,
-            "use_angle_cls": False,
-        }
+    def _parse_vision_lines(self, data: Dict[str, Any]) -> Tuple[List[OCRLine], str]:
+        responses = data.get("responses", []) if isinstance(data, dict) else []
+        if not responses or not isinstance(responses[0], dict):
+            return [], ""
+        response0 = responses[0]
+        if isinstance(response0.get("error"), dict):
+            message = str(response0["error"].get("message", "")).strip()
+            raise RuntimeError(f"Google Vision OCR failed: {message or 'unknown error'}")
 
-        try:
-            self._ocr_engine = PaddleOCR(**kwargs_v1)
-            return self._ocr_engine
-        except TypeError:
-            try:
-                self._ocr_engine = PaddleOCR(**kwargs_v2)
-                return self._ocr_engine
-            except Exception as exc:
-                raise RuntimeError(f"PaddleOCR 엔진 초기화 실패: {exc}") from exc
-        except Exception as exc:
-            raise RuntimeError(f"PaddleOCR 엔진 초기화 실패: {exc}") from exc
+        full = response0.get("fullTextAnnotation", {}) if isinstance(response0, dict) else {}
+        locale = str(full.get("locale", "")).strip() if isinstance(full, dict) else ""
+
+        lines: List[OCRLine] = []
+        pages = full.get("pages", []) if isinstance(full, dict) else []
+        for page in pages or []:
+            for block in page.get("blocks", []) or []:
+                for paragraph in block.get("paragraphs", []) or []:
+                    text = self._vision_paragraph_text(paragraph)
+                    if not text:
+                        continue
+                    conf = self._vision_confidence(paragraph, default=0.9)
+                    bbox = self._vision_vertices_to_bbox(
+                        (paragraph.get("boundingBox", {}) or {}).get("vertices", [])
+                    )
+                    lines.append(OCRLine(text=text, confidence=conf, bbox=bbox))
+        if lines:
+            return lines, locale
+
+        text_ann = response0.get("textAnnotations", []) if isinstance(response0, dict) else []
+        for ann in (text_ann[1:] if len(text_ann) > 1 else []):
+            if not isinstance(ann, dict):
+                continue
+            text = str(ann.get("description", "")).strip()
+            if not text:
+                continue
+            bbox = self._vision_vertices_to_bbox(
+                (ann.get("boundingPoly", {}) or {}).get("vertices", [])
+            )
+            lines.append(OCRLine(text=text, confidence=0.9, bbox=bbox))
+        return lines, locale
 
     @staticmethod
-    def _resolve_lang(menu_country_code: Optional[str], ocr_lang_override: Optional[str]) -> str:
+    def _vision_paragraph_text(paragraph: Dict[str, Any]) -> str:
+        words = paragraph.get("words", []) if isinstance(paragraph, dict) else []
+        out_words: List[str] = []
+        for word in words or []:
+            symbols = word.get("symbols", []) if isinstance(word, dict) else []
+            token = "".join(str(symbol.get("text", "")) for symbol in symbols if isinstance(symbol, dict))
+            token = token.strip()
+            if token:
+                out_words.append(token)
+        return " ".join(out_words).strip()
+
+    @staticmethod
+    def _vision_confidence(item: Dict[str, Any], default: float = 0.9) -> float:
+        try:
+            value = float(item.get("confidence", default))
+        except Exception:
+            value = float(default)
+        return max(0.0, min(1.0, value))
+
+    @staticmethod
+    def _vision_vertices_to_bbox(vertices: Any) -> List[List[float]]:
+        out: List[List[float]] = []
+        if not isinstance(vertices, list):
+            return out
+        for vertex in vertices:
+            if not isinstance(vertex, dict):
+                continue
+            try:
+                x = float(vertex.get("x", 0) or 0)
+                y = float(vertex.get("y", 0) or 0)
+            except Exception:
+                continue
+            out.append([x, y])
+        return out
+
+    @staticmethod
+    def _filter_and_sort_lines(
+        lines: List[OCRLine],
+        min_confidence: float,
+        include_bbox: bool = True,
+    ) -> List[OCRLine]:
+        filtered = [
+            OCRLine(text=ln.text.strip(), confidence=ln.confidence, bbox=ln.bbox)
+            for ln in lines
+            if ln.text and ln.text.strip() and ln.confidence >= min_confidence
+        ]
+        filtered.sort(key=lambda x: (OCRAgent._top_y(x.bbox), OCRAgent._left_x(x.bbox)))
+        if not include_bbox:
+            return [OCRLine(text=ln.text, confidence=ln.confidence, bbox=[]) for ln in filtered]
+        return filtered
+
+    @classmethod
+    def _expected_script_ratio(cls, texts: List[str], lang: str) -> float:
+        profile = cls._character_profile(texts)
+        hangul_ratio = profile["hangul_ratio"]
+        latin_ratio = profile["latin_ratio"]
+        spanish_ratio = profile["spanish_ratio"]
+
+        if lang == "korean":
+            return min(1.0, hangul_ratio)
+        if lang == "es":
+            return min(1.0, latin_ratio + (spanish_ratio * 0.35))
+        if lang == "en":
+            return max(0.0, min(1.0, latin_ratio - (spanish_ratio * 0.10)))
+        return 0.0
+
+    @classmethod
+    def _character_profile(cls, texts: List[str]) -> Dict[str, float]:
+        joined = "".join(texts)
+        signal_chars = 0
+        hangul = 0
+        latin = 0
+        spanish = 0
+        for ch in joined:
+            code = ord(ch)
+            if ch in cls.SPANISH_HINT_CHARS:
+                spanish += 1
+            if 0xAC00 <= code <= 0xD7A3:
+                hangul += 1
+                signal_chars += 1
+            elif cls._is_latin_char(ch):
+                latin += 1
+                signal_chars += 1
+
+        denom = float(signal_chars or 1)
+        return {
+            "hangul_ratio": hangul / denom,
+            "latin_ratio": latin / denom,
+            "spanish_ratio": min(1.0, spanish / denom),
+        }
+
+    @staticmethod
+    def _is_latin_char(ch: str) -> bool:
+        code = ord(ch)
+        return (
+            0x0041 <= code <= 0x005A
+            or 0x0061 <= code <= 0x007A
+            or 0x00C0 <= code <= 0x00FF
+            or 0x0100 <= code <= 0x017F
+        )
+
+    @classmethod
+    def warmup_shared_engines(
+        cls,
+        langs: Optional[Sequence[str]] = None,
+        preload_probe: bool = True,
+        preload_full: bool = False,
+    ) -> None:
+        _ = (langs, preload_probe, preload_full)
+        # Vision-only 경로에서는 별도 로컬 엔진 로딩이 없다.
+        return None
+
+    @classmethod
+    def _normalize_probe_languages(cls, probe_languages: Optional[Sequence[str]]) -> List[str]:
+        raw_values = list(probe_languages) if probe_languages else list(cls.DEFAULT_AUTO_LANGS)
+        out: List[str] = []
+        seen = set()
+        for value in raw_values:
+            if not isinstance(value, str):
+                continue
+            lang = value.strip().lower()
+            if not lang or lang in seen or lang not in cls.SUPPORTED_OCR_LANGS:
+                continue
+            seen.add(lang)
+            out.append(lang)
+        return out or list(cls.DEFAULT_AUTO_LANGS)
+
+    @staticmethod
+    def _resolve_lang(menu_country_code: Optional[str], ocr_lang_override: Optional[str]) -> Optional[str]:
         lang_aliases = {
+            "auto": None,
             "ko": "korean",
             "korean": "korean",
-            "ja": "japan",
-            "japan": "japan",
-            "zh": "ch",
-            "zh-cn": "ch",
-            "zh-tw": "chinese_cht",
-            "ch": "ch",
-            "chinese_cht": "chinese_cht",
             "en": "en",
             "es": "es",
         }
         override = (ocr_lang_override or "").strip().lower()
         if override:
-            return lang_aliases.get(override, "en")
+            return lang_aliases.get(override)
 
-        country = (menu_country_code or "KR").strip().upper()
+        country = (menu_country_code or "").strip().upper()
+        if not country or country in {"AUTO", "UNKNOWN", "NONE"}:
+            return None
+
         country = country.replace("_", "-").split("-", 1)[0]
         country_to_lang = {
             "KR": "korean",
-            "JP": "japan",
-            "CN": "ch",
-            "TW": "chinese_cht",
-            "HK": "chinese_cht",
             "US": "en",
             "GB": "en",
+            "AU": "en",
+            "CA": "en",
             "ES": "es",
+            "MX": "es",
+            "AR": "es",
+            "CL": "es",
+            "CO": "es",
+            "PE": "es",
         }
-        return country_to_lang.get(country, "en")
-
-    @staticmethod
-    def _decode_image(image_bytes: bytes):
-        if not image_bytes:
-            return None
-        buf = np.frombuffer(image_bytes, dtype=np.uint8)
-        if buf.size == 0:
-            return None
-        return cv2.imdecode(buf, cv2.IMREAD_COLOR)
-
-    def _parse_lines(self, raw: Any) -> List[OCRLine]:
-        if not isinstance(raw, list) or not raw:
-            return []
-
-        if isinstance(raw[0], dict):
-            return self._parse_dict_result(raw)
-
-        groups = [raw] if self._is_line_item(raw[0]) else [g for g in raw if isinstance(g, list)]
-        out: List[OCRLine] = []
-        for group in groups:
-            for item in group:
-                line = self._parse_item(item)
-                if line is not None:
-                    out.append(line)
-        return out
-
-    @staticmethod
-    def _parse_dict_result(raw: List[Any]) -> List[OCRLine]:
-        out: List[OCRLine] = []
-        for item in raw:
-            if not isinstance(item, dict):
-                continue
-            polys = OCRAgent._first_present(item, ["dt_polys", "rec_polys", "polys", "boxes"], default=[])
-            texts = item.get("rec_texts") or []
-            scores = item.get("rec_scores") or []
-
-            n = min(len(polys), len(texts), len(scores))
-            for i in range(n):
-                bbox = OCRAgent._to_bbox_points(polys[i])
-                text = str(texts[i] or "")
-                try:
-                    conf = float(scores[i])
-                except Exception:
-                    conf = 0.0
-                conf = max(0.0, min(1.0, conf))
-                out.append(OCRLine(text=text, confidence=conf, bbox=bbox))
-        return out
-
-    @staticmethod
-    def _is_line_item(item: Any) -> bool:
-        return isinstance(item, list) and len(item) >= 2 and isinstance(item[0], (list, tuple))
-
-    @staticmethod
-    def _parse_item(item: Any) -> Optional[OCRLine]:
-        if not isinstance(item, list) or len(item) < 2:
-            return None
-
-        bbox = OCRAgent._to_bbox_points(item[0])
-        if not bbox:
-            return None
-
-        txt_raw = item[1]
-        text = ""
-        conf = 0.0
-        if isinstance(txt_raw, (list, tuple)) and len(txt_raw) >= 1:
-            text = str(txt_raw[0] or "")
-            if len(txt_raw) >= 2:
-                try:
-                    conf = float(txt_raw[1])
-                except Exception:
-                    conf = 0.0
-        else:
-            text = str(txt_raw or "")
-        conf = max(0.0, min(1.0, conf))
-        return OCRLine(text=text, confidence=conf, bbox=bbox)
-
-    @staticmethod
-    def _first_present(data: dict, keys: List[str], default: Any):
-        for k in keys:
-            v = data.get(k)
-            if v is not None:
-                return v
-        return default
-
-    @staticmethod
-    def _to_bbox_points(bbox_raw: Any) -> List[List[float]]:
-        if bbox_raw is None:
-            return []
-
-        pts_src = bbox_raw.tolist() if hasattr(bbox_raw, "tolist") else bbox_raw
-        if not isinstance(pts_src, (list, tuple)):
-            return []
-
-        pts: List[List[float]] = []
-        for pt in pts_src:
-            cur = pt.tolist() if hasattr(pt, "tolist") else pt
-            if not isinstance(cur, (list, tuple)) or len(cur) < 2:
-                continue
-            try:
-                pts.append([float(cur[0]), float(cur[1])])
-            except Exception:
-                continue
-        return pts
+        return country_to_lang.get(country)
 
     @staticmethod
     def _top_y(bbox: List[List[float]]) -> float:

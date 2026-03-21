@@ -1,0 +1,952 @@
+{
+  "input_image": "menu_image/menu_korean.png",
+  "preprocessed_image": "debug/preprocessed_for_ocr_experiment.png",
+  "menu_country_code": "AUTO",
+  "menu_lang": "ko",
+  "ocr_lang_resolved": "korean",
+  "timings_ms": {
+    "preprocess": 33,
+    "ocr": 903,
+    "extractor": 14888,
+    "clean": 1,
+    "total": 15828
+  },
+  "ocr_options": {
+    "min_confidence": 0.5,
+    "include_bbox": false
+  },
+  "ocr_result": {
+    "lines": [
+      {
+        "text": "가가 솥밥",
+        "confidence": 0.9718803,
+        "bbox": []
+      },
+      {
+        "text": "가가 솥밥 이 짓는 쌀 은 단일 신품종 으로 부드러운 식감 과",
+        "confidence": 0.98827606,
+        "bbox": []
+      },
+      {
+        "text": "구수한 향 의 풍미 가 일품 이며 , 쫀득 한 찰기 가 느껴지는 골드 퀸 3 호 입니다 .",
+        "confidence": 0.9825788,
+        "bbox": []
+      },
+      {
+        "text": "가가 솥밥 의 솥밥 에는 메인 식재료 이외에 10 가지 이상의 신선한 재료 들이 함께 들어 있습니다 .",
+        "confidence": 0.9837669,
+        "bbox": []
+      },
+      {
+        "text": "포장 · 배달 가능 합니다 .",
+        "confidence": 0.91123575,
+        "bbox": []
+      },
+      {
+        "text": "솥밥",
+        "confidence": 0.957916,
+        "bbox": []
+      },
+      {
+        "text": "사이드",
+        "confidence": 0.9900081,
+        "bbox": []
+      },
+      {
+        "text": "영양 버섯 솥밥",
+        "confidence": 0.8828978,
+        "bbox": []
+      },
+      {
+        "text": "간장 제육",
+        "confidence": 0.9881161,
+        "bbox": []
+      },
+      {
+        "text": "명란 버터 솥밥 짭조름 한 명란 과 고소한 버터 의",
+        "confidence": 0.95342195,
+        "bbox": []
+      },
+      {
+        "text": "계절 따라 즐기는 다섯 가지 버섯 과",
+        "confidence": 0.98982227,
+        "bbox": []
+      },
+      {
+        "text": "특제 과일 양념 으로 24 시간 숙성 시킨 돼지 목살 부위 , 간장 소스 의 제육 볶음 8,000 원",
+        "confidence": 0.9800937,
+        "bbox": []
+      },
+      {
+        "text": "야채 가 가득 들어 있는",
+        "confidence": 0.9802121,
+        "bbox": []
+      },
+      {
+        "text": "조화 가 잘 어우러진 솥밥 15,000 원",
+        "confidence": 0.9835934,
+        "bbox": []
+      },
+      {
+        "text": "건강 영양 버섯 솥밥",
+        "confidence": 0.91831374,
+        "bbox": []
+      },
+      {
+        "text": "15,000 원",
+        "confidence": 0.99471897,
+        "bbox": []
+      },
+      {
+        "text": "토시 스테이크 솥밥 BEST",
+        "confidence": 0.96712476,
+        "bbox": []
+      },
+      {
+        "text": "매콤 쭈꾸미",
+        "confidence": 0.95454186,
+        "bbox": []
+      },
+      {
+        "text": "붉은 대게 솥밥 BEST",
+        "confidence": 0.9590816,
+        "bbox": []
+      },
+      {
+        "text": "24 시간 숙성 시킨 특제 매콤 양념 으로 맛 을 낸 매콤 쭈꾸미 볶음 8,000 원",
+        "confidence": 0.98742115,
+        "bbox": []
+      },
+      {
+        "text": "12 시간 숙성 시킨 부드러운 토시살 과 고소한 풍미 의 밥 , 야채 와 의 밸런스 를 느낄 수 있는 솥밥",
+        "confidence": 0.9689541,
+        "bbox": []
+      },
+      {
+        "text": "국내산 붉은 대게 가 가득 담긴 건강 을 위한 프리미엄 솥밥 19,000 원",
+        "confidence": 0.98053366,
+        "bbox": []
+      },
+      {
+        "text": "18,000 원",
+        "confidence": 0.99337524,
+        "bbox": []
+      },
+      {
+        "text": "참 도미 솥밥",
+        "confidence": 0.9460357,
+        "bbox": []
+      },
+      {
+        "text": "일품 요리 ( 저녁 한정 )",
+        "confidence": 0.9868479,
+        "bbox": []
+      },
+      {
+        "text": "국내산 활도 미와 새우 , 홍합 의",
+        "confidence": 0.9696375,
+        "bbox": []
+      },
+      {
+        "text": "조화 로운 감칠맛 이 특징 인",
+        "confidence": 0.9891568,
+        "bbox": []
+      },
+      {
+        "text": "고 퀄리티 솥밥",
+        "confidence": 0.8575745,
+        "bbox": []
+      },
+      {
+        "text": "소고기 스키야키",
+        "confidence": 0.9716544,
+        "bbox": []
+      },
+      {
+        "text": "22,000 원",
+        "confidence": 0.9793064,
+        "bbox": []
+      },
+      {
+        "text": "소고기 와 신선한 채소 를 넣고",
+        "confidence": 0.9806857,
+        "bbox": []
+      },
+      {
+        "text": "자작 하게 끓인 스키야키",
+        "confidence": 0.9720907,
+        "bbox": []
+      },
+      {
+        "text": "30,000 원",
+        "confidence": 0.99320215,
+        "bbox": []
+      },
+      {
+        "text": "주류 / 음료",
+        "confidence": 0.9891231,
+        "bbox": []
+      },
+      {
+        "text": "대창 전골",
+        "confidence": 0.9930066,
+        "bbox": []
+      },
+      {
+        "text": "연태 / 자몽 / 얼그레이 하이볼 500ml 8,000 원",
+        "confidence": 0.9874106,
+        "bbox": []
+      },
+      {
+        "text": "연태 고량주 ( 34.2 ℃ ) 250ml",
+        "confidence": 0.983589,
+        "bbox": []
+      },
+      {
+        "text": "20,000 원",
+        "confidence": 0.99400866,
+        "bbox": []
+      },
+      {
+        "text": "대창 , 우삼겹 , 양 , 염통 과 신선한 채소 를 넣고 특제 간장 육수 에 월남 고추 를 넣어 자작 하게 끓인 전골",
+        "confidence": 0.96315664,
+        "bbox": []
+      },
+      {
+        "text": "5,000 원",
+        "confidence": 0.9949676,
+        "bbox": []
+      },
+      {
+        "text": "병 맥주 500ml",
+        "confidence": 0.9939389,
+        "bbox": []
+      },
+      {
+        "text": "소주",
+        "confidence": 0.9642947,
+        "bbox": []
+      },
+      {
+        "text": "5,000 원",
+        "confidence": 0.9920773,
+        "bbox": []
+      },
+      {
+        "text": "30,000 원",
+        "confidence": 0.9947076,
+        "bbox": []
+      },
+      {
+        "text": "콜라 / 사이다 355ml",
+        "confidence": 0.9845969,
+        "bbox": []
+      },
+      {
+        "text": "2,000 원",
+        "confidence": 0.9935962,
+        "bbox": []
+      }
+    ],
+    "texts": [
+      "가가 솥밥",
+      "가가 솥밥 이 짓는 쌀 은 단일 신품종 으로 부드러운 식감 과",
+      "구수한 향 의 풍미 가 일품 이며 , 쫀득 한 찰기 가 느껴지는 골드 퀸 3 호 입니다 .",
+      "가가 솥밥 의 솥밥 에는 메인 식재료 이외에 10 가지 이상의 신선한 재료 들이 함께 들어 있습니다 .",
+      "포장 · 배달 가능 합니다 .",
+      "솥밥",
+      "사이드",
+      "영양 버섯 솥밥",
+      "간장 제육",
+      "명란 버터 솥밥 짭조름 한 명란 과 고소한 버터 의",
+      "계절 따라 즐기는 다섯 가지 버섯 과",
+      "특제 과일 양념 으로 24 시간 숙성 시킨 돼지 목살 부위 , 간장 소스 의 제육 볶음 8,000 원",
+      "야채 가 가득 들어 있는",
+      "조화 가 잘 어우러진 솥밥 15,000 원",
+      "건강 영양 버섯 솥밥",
+      "15,000 원",
+      "토시 스테이크 솥밥 BEST",
+      "매콤 쭈꾸미",
+      "붉은 대게 솥밥 BEST",
+      "24 시간 숙성 시킨 특제 매콤 양념 으로 맛 을 낸 매콤 쭈꾸미 볶음 8,000 원",
+      "12 시간 숙성 시킨 부드러운 토시살 과 고소한 풍미 의 밥 , 야채 와 의 밸런스 를 느낄 수 있는 솥밥",
+      "국내산 붉은 대게 가 가득 담긴 건강 을 위한 프리미엄 솥밥 19,000 원",
+      "18,000 원",
+      "참 도미 솥밥",
+      "일품 요리 ( 저녁 한정 )",
+      "국내산 활도 미와 새우 , 홍합 의",
+      "조화 로운 감칠맛 이 특징 인",
+      "고 퀄리티 솥밥",
+      "소고기 스키야키",
+      "22,000 원",
+      "소고기 와 신선한 채소 를 넣고",
+      "자작 하게 끓인 스키야키",
+      "30,000 원",
+      "주류 / 음료",
+      "대창 전골",
+      "연태 / 자몽 / 얼그레이 하이볼 500ml 8,000 원",
+      "연태 고량주 ( 34.2 ℃ ) 250ml",
+      "20,000 원",
+      "대창 , 우삼겹 , 양 , 염통 과 신선한 채소 를 넣고 특제 간장 육수 에 월남 고추 를 넣어 자작 하게 끓인 전골",
+      "5,000 원",
+      "병 맥주 500ml",
+      "소주",
+      "5,000 원",
+      "30,000 원",
+      "콜라 / 사이다 355ml",
+      "2,000 원"
+    ],
+    "resolved_lang": "korean",
+    "lang_detection_source": "manual",
+    "lang_detection_candidates": []
+  },
+  "extractor_result": {
+    "items": [
+      {
+        "text": "가가 솥밥",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "가가 솥밥 이 짓는 쌀 은 단일 신품종 으로 부드러운 식감 과",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "구수한 향 의 풍미 가 일품 이며 , 쫀득 한 찰기 가 느껴지는 골드 퀸 3 호 입니다 .",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "가가 솥밥 의 솥밥 에는 메인 식재료 이외에 10 가지 이상의 신선한 재료 들이 함께 들어 있습니다 .",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "포장 · 배달 가능 합니다 .",
+        "label": "other",
+        "is_menu": false
+      },
+      {
+        "text": "솥밥",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "사이드",
+        "label": "category_header",
+        "is_menu": false
+      },
+      {
+        "text": "영양 버섯 솥밥",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "간장 제육",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "명란 버터 솥밥 짭조름 한 명란 과 고소한 버터 의",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "계절 따라 즐기는 다섯 가지 버섯 과",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "특제 과일 양념 으로 24 시간 숙성 시킨 돼지 목살 부위 , 간장 소스 의 제육 볶음 8,000 원",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "야채 가 가득 들어 있는",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "조화 가 잘 어우러진 솥밥 15,000 원",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "건강 영양 버섯 솥밥",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "15,000 원",
+        "label": "price",
+        "is_menu": false
+      },
+      {
+        "text": "토시 스테이크 솥밥 BEST",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "매콤 쭈꾸미",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "붉은 대게 솥밥 BEST",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "24 시간 숙성 시킨 특제 매콤 양념 으로 맛 을 낸 매콤 쭈꾸미 볶음 8,000 원",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "12 시간 숙성 시킨 부드러운 토시살 과 고소한 풍미 의 밥 , 야채 와 의 밸런스 를 느낄 수 있는 솥밥",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "국내산 붉은 대게 가 가득 담긴 건강 을 위한 프리미엄 솥밥 19,000 원",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "18,000 원",
+        "label": "price",
+        "is_menu": false
+      },
+      {
+        "text": "참 도미 솥밥",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "일품 요리 ( 저녁 한정 )",
+        "label": "other",
+        "is_menu": false
+      },
+      {
+        "text": "국내산 활도 미와 새우 , 홍합 의",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "조화 로운 감칠맛 이 특징 인",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "고 퀄리티 솥밥",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "소고기 스키야키",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "22,000 원",
+        "label": "price",
+        "is_menu": false
+      },
+      {
+        "text": "소고기 와 신선한 채소 를 넣고",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "자작 하게 끓인 스키야키",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "30,000 원",
+        "label": "price",
+        "is_menu": false
+      },
+      {
+        "text": "주류 / 음료",
+        "label": "category_header",
+        "is_menu": false
+      },
+      {
+        "text": "대창 전골",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "연태 / 자몽 / 얼그레이 하이볼 500ml 8,000 원",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "연태 고량주 ( 34.2 ℃ ) 250ml",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "20,000 원",
+        "label": "price",
+        "is_menu": false
+      },
+      {
+        "text": "대창 , 우삼겹 , 양 , 염통 과 신선한 채소 를 넣고 특제 간장 육수 에 월남 고추 를 넣어 자작 하게 끓인 전골",
+        "label": "description",
+        "is_menu": false
+      },
+      {
+        "text": "5,000 원",
+        "label": "price",
+        "is_menu": false
+      },
+      {
+        "text": "병 맥주 500ml",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "소주",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "콜라 / 사이다 355ml",
+        "label": "menu_item",
+        "is_menu": true
+      },
+      {
+        "text": "2,000 원",
+        "label": "price",
+        "is_menu": false
+      }
+    ],
+    "menu_texts": [
+      "가가 솥밥",
+      "솥밥",
+      "영양 버섯 솥밥",
+      "간장 제육",
+      "특제 과일 양념 으로 24 시간 숙성 시킨 돼지 목살 부위 , 간장 소스 의 제육 볶음 8,000 원",
+      "조화 가 잘 어우러진 솥밥 15,000 원",
+      "건강 영양 버섯 솥밥",
+      "토시 스테이크 솥밥 BEST",
+      "매콤 쭈꾸미",
+      "붉은 대게 솥밥 BEST",
+      "24 시간 숙성 시킨 특제 매콤 양념 으로 맛 을 낸 매콤 쭈꾸미 볶음 8,000 원",
+      "국내산 붉은 대게 가 가득 담긴 건강 을 위한 프리미엄 솥밥 19,000 원",
+      "참 도미 솥밥",
+      "고 퀄리티 솥밥",
+      "소고기 스키야키",
+      "대창 전골",
+      "연태 / 자몽 / 얼그레이 하이볼 500ml 8,000 원",
+      "연태 고량주 ( 34.2 ℃ ) 250ml",
+      "병 맥주 500ml",
+      "소주",
+      "콜라 / 사이다 355ml",
+      "명란 버터 솥밥"
+    ]
+  },
+  "clean_result": {
+    "cleaned_items": [
+      "소고기 스키야키",
+      "토시 스테이크 솥밥",
+      "매콤 쭈꾸미",
+      "간장 제육",
+      "대창 전골",
+      "명란 버터 솥밥",
+      "붉은 대게 솥밥",
+      "영양 버섯 솥밥",
+      "병 맥주 500ml",
+      "참 도미 솥밥",
+      "콜라 / 사이다 355ml",
+      "소주",
+      "연태 / 자몽 / 얼그레이 하이볼 500ml",
+      "연태 고량주 ( 34.2 ℃ ) 250ml"
+    ],
+    "kept": [
+      {
+        "raw_text": "소고기 스키야키",
+        "cleaned_text": "소고기 스키야키",
+        "compact_text": "소고기스키야키",
+        "status": "kept",
+        "reasons": [],
+        "score": 7.0,
+        "metrics": {
+          "letter_count": 7.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 2.0,
+          "informative_count": 7.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "토시 스테이크 솥밥 BEST",
+        "cleaned_text": "토시 스테이크 솥밥",
+        "compact_text": "토시스테이크솥밥",
+        "status": "kept",
+        "reasons": [
+          "stripped_trailing_badge"
+        ],
+        "score": 6.0,
+        "metrics": {
+          "letter_count": 8.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 3.0,
+          "informative_count": 8.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "매콤 쭈꾸미",
+        "cleaned_text": "매콤 쭈꾸미",
+        "compact_text": "매콤쭈꾸미",
+        "status": "kept",
+        "reasons": [],
+        "score": 5.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 2.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "간장 제육",
+        "cleaned_text": "간장 제육",
+        "compact_text": "간장제육",
+        "status": "kept",
+        "reasons": [],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 4.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 2.0,
+          "informative_count": 4.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "대창 전골",
+        "cleaned_text": "대창 전골",
+        "compact_text": "대창전골",
+        "status": "kept",
+        "reasons": [],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 4.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 2.0,
+          "informative_count": 4.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "명란 버터 솥밥",
+        "cleaned_text": "명란 버터 솥밥",
+        "compact_text": "명란버터솥밥",
+        "status": "kept",
+        "reasons": [],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 6.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 3.0,
+          "informative_count": 6.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "붉은 대게 솥밥 BEST",
+        "cleaned_text": "붉은 대게 솥밥",
+        "compact_text": "붉은대게솥밥",
+        "status": "kept",
+        "reasons": [
+          "stripped_trailing_badge"
+        ],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 6.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 3.0,
+          "informative_count": 6.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "영양 버섯 솥밥",
+        "cleaned_text": "영양 버섯 솥밥",
+        "compact_text": "영양버섯솥밥",
+        "status": "kept",
+        "reasons": [],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 6.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 3.0,
+          "informative_count": 6.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "병 맥주 500ml",
+        "cleaned_text": "병 맥주 500ml",
+        "compact_text": "병맥주500ml",
+        "status": "kept",
+        "reasons": [],
+        "score": 3.45,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 3.0,
+          "symbol_count": 0.0,
+          "token_count": 3.0,
+          "informative_count": 8.0,
+          "letter_ratio": 0.625
+        }
+      },
+      {
+        "raw_text": "참 도미 솥밥",
+        "cleaned_text": "참 도미 솥밥",
+        "compact_text": "참도미솥밥",
+        "status": "kept",
+        "reasons": [],
+        "score": 3.0,
+        "metrics": {
+          "letter_count": 5.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 3.0,
+          "informative_count": 5.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "콜라 / 사이다 355ml",
+        "cleaned_text": "콜라 / 사이다 355ml",
+        "compact_text": "콜라사이다355ml",
+        "status": "kept",
+        "reasons": [],
+        "score": 2.95,
+        "metrics": {
+          "letter_count": 7.0,
+          "digit_count": 3.0,
+          "symbol_count": 1.0,
+          "token_count": 4.0,
+          "informative_count": 11.0,
+          "letter_ratio": 0.6363636363636364
+        }
+      },
+      {
+        "raw_text": "소주",
+        "cleaned_text": "소주",
+        "compact_text": "소주",
+        "status": "kept",
+        "reasons": [],
+        "score": 2.0,
+        "metrics": {
+          "letter_count": 2.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 2.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "연태 / 자몽 / 얼그레이 하이볼 500ml 8,000 원",
+        "cleaned_text": "연태 / 자몽 / 얼그레이 하이볼 500ml",
+        "compact_text": "연태자몽얼그레이하이볼500ml",
+        "status": "kept",
+        "reasons": [
+          "stripped_trailing_price"
+        ],
+        "score": 0.25,
+        "metrics": {
+          "letter_count": 13.0,
+          "digit_count": 3.0,
+          "symbol_count": 2.0,
+          "token_count": 7.0,
+          "informative_count": 18.0,
+          "letter_ratio": 0.7222222222222222
+        }
+      },
+      {
+        "raw_text": "연태 고량주 ( 34.2 ℃ ) 250ml",
+        "cleaned_text": "연태 고량주 ( 34.2 ℃ ) 250ml",
+        "compact_text": "연태고량주342°c250ml",
+        "status": "kept",
+        "reasons": [],
+        "score": -7.58,
+        "metrics": {
+          "letter_count": 7.0,
+          "digit_count": 6.0,
+          "symbol_count": 4.0,
+          "token_count": 7.0,
+          "informative_count": 17.0,
+          "letter_ratio": 0.4117647058823529
+        }
+      }
+    ],
+    "dropped": [
+      {
+        "raw_text": "24 시간 숙성 시킨 특제 매콤 양념 으로 맛 을 낸 매콤 쭈꾸미 볶음 8,000 원",
+        "cleaned_text": "시간 숙성 시킨 특제 매콤 양념 으로 맛 을 낸 매콤 쭈꾸미 볶음",
+        "compact_text": "시간숙성시킨특제매콤양념으로맛을낸매콤쭈꾸미볶음",
+        "status": "dropped",
+        "reasons": [
+          "stripped_leading_index",
+          "stripped_trailing_price",
+          "looks_like_description"
+        ],
+        "score": -8.84,
+        "metrics": {
+          "letter_count": 24.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 13.0,
+          "informative_count": 24.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "가가 솥밥",
+        "cleaned_text": "가가 솥밥",
+        "compact_text": "가가솥밥",
+        "status": "dropped",
+        "reasons": [
+          "contextual_brand_title"
+        ],
+        "score": 4.0,
+        "metrics": {
+          "letter_count": 4.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 2.0,
+          "informative_count": 4.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "건강 영양 버섯 솥밥",
+        "cleaned_text": "건강 영양 버섯 솥밥",
+        "compact_text": "건강영양버섯솥밥",
+        "status": "dropped",
+        "reasons": [
+          "overlap_lower_quality:contained"
+        ],
+        "score": 2.0,
+        "metrics": {
+          "letter_count": 8.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 4.0,
+          "informative_count": 8.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "고 퀄리티 솥밥",
+        "cleaned_text": "고 퀄리티 솥밥",
+        "compact_text": "고퀄리티솥밥",
+        "status": "dropped",
+        "reasons": [
+          "contextual_marketing_title"
+        ],
+        "score": 2.0,
+        "metrics": {
+          "letter_count": 6.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 3.0,
+          "informative_count": 6.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "국내산 붉은 대게 가 가득 담긴 건강 을 위한 프리미엄 솥밥 19,000 원",
+        "cleaned_text": "국내산 붉은 대게 가 가득 담긴 건강 을 위한 프리미엄 솥밥",
+        "compact_text": "국내산붉은대게가가득담긴건강을위한프리미엄솥밥",
+        "status": "dropped",
+        "reasons": [
+          "stripped_trailing_price",
+          "looks_like_description"
+        ],
+        "score": -9.18,
+        "metrics": {
+          "letter_count": 23.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 11.0,
+          "informative_count": 23.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "솥밥",
+        "cleaned_text": "솥밥",
+        "compact_text": "솥밥",
+        "status": "dropped",
+        "reasons": [
+          "common_suffix_header"
+        ],
+        "score": 2.0,
+        "metrics": {
+          "letter_count": 2.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 1.0,
+          "informative_count": 2.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "조화 가 잘 어우러진 솥밥 15,000 원",
+        "cleaned_text": "조화 가 잘 어우러진 솥밥",
+        "compact_text": "조화가잘어우러진솥밥",
+        "status": "dropped",
+        "reasons": [
+          "stripped_trailing_price",
+          "looks_like_description"
+        ],
+        "score": -2.0,
+        "metrics": {
+          "letter_count": 10.0,
+          "digit_count": 0.0,
+          "symbol_count": 0.0,
+          "token_count": 5.0,
+          "informative_count": 10.0,
+          "letter_ratio": 1.0
+        }
+      },
+      {
+        "raw_text": "특제 과일 양념 으로 24 시간 숙성 시킨 돼지 목살 부위 , 간장 소스 의 제육 볶음 8,000 원",
+        "cleaned_text": "특제 과일 양념 으로 24 시간 숙성 시킨 돼지 목살 부위 , 간장 소스 의 제육 볶음",
+        "compact_text": "특제과일양념으로24시간숙성시킨돼지목살부위간장소스의제육볶음",
+        "status": "dropped",
+        "reasons": [
+          "stripped_trailing_price",
+          "looks_like_description"
+        ],
+        "score": -16.78,
+        "metrics": {
+          "letter_count": 29.0,
+          "digit_count": 2.0,
+          "symbol_count": 1.0,
+          "token_count": 17.0,
+          "informative_count": 32.0,
+          "letter_ratio": 0.90625
+        }
+      }
+    ]
+  }
+}

@@ -14,7 +14,7 @@ class AvoidIntakeAgent:
     def run(self, request: AvoidIntakeInput) -> AvoidIntakeOutput:
         text = (request.user_text or "").strip()
         # 지원 언어 외 값이 들어오면 기본 한국어로 고정한다.
-        lang = request.lang if request.lang in {"ko", "en", "cn"} else "ko"
+        lang = request.lang if request.lang in {"ko", "en", "es"} else "ko"
         if not text:
             q = self._fallback_confirm([], lang)
             return AvoidIntakeOutput(candidates=[], confirm_question=q, confirm_question_ko=q)
@@ -62,12 +62,12 @@ OUTPUT JSON ONLY:
             return {
                 "ko": "기피 재료를 다시 알려줘.",
                 "en": "Please tell me your avoid ingredients again.",
-                "cn": "请再告诉我你要忌口的食材。",
+                "es": "Vuelve a decirme qué ingredientes quieres evitar.",
             }[lang]
 
         joined = ", ".join(candidates)
         return {
             "ko": f"너 {joined} 피하는 거 맞지?",
             "en": f"Just to confirm, are you avoiding {joined}?",
-            "cn": f"确认一下，你是要避免 {joined} 吗？",
+            "es": f"Solo para confirmar, ¿quieres evitar {joined}?",
         }[lang]

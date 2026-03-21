@@ -7,105 +7,175 @@ from app.agents._eval_4_1_risk_assessor import RiskAssessAgent
 class FakeGemma:
     def __init__(self, text: str):
         self._text = text
+        self.last_prompt = ""
 
     def generate_text(self, contents, max_output_tokens=2000):
+        if isinstance(contents, list) and contents:
+            self.last_prompt = str(contents[0])
         return self._text
 
 
 class RiskAssessAgentTest(unittest.TestCase):
-    def test_filters_and_clamps_fields(self):
+    def test_prompt_uses_global_ingredient_canonicals(self):
+        fake = FakeGemma('{"items":[{"menu_name":"LA Special Steak","confidence":0.8,"suspects":[]}]}')
+        agent = RiskAssessAgent(fake)
+        req = RiskAssessInput(items=["LA Special Steak"], avoid=["egg"])
+
+        agent.run(req)
+
+        self.assertIn("Allowed ingredient canonicals", fake.last_prompt)
+        self.assertIn('"beef"', fake.last_prompt)
+        self.assertIn('"wheat"', fake.last_prompt)
+
+    def test_infers_representative_ingredients_without_forced_avoid_match(self):
         fake = FakeGemma(
             """
             {
               "items": [
                 {
-                  "menu": "Katsu Don",
-                  "risk": 130,
-                  "confidence": -0.2,
-                  "suspected_ingredients": ["egg", "pork", "onion", "extra"],
-                  "matched_avoid": ["egg", "random"],
-                  "why_ko": "계란 가능성"
-                },
-                {
-                  "menu": "NotInInput",
-                  "risk": 10,
-                  "confidence": 0.9,
-                  "suspected_ingredients": ["x"],
-                  "matched_avoid": ["x"],
-                  "why_ko": "무시"
+                  "menu_name": "LA Special Steak",
+                  "confidence": 0.7,
+                  "suspects": [
+                    {"canonical": "beef", "evidence_type": "menu_prior", "evidence_text": null, "reason": "steak profile", "confidence": 0.8}
+                  ]
                 }
               ]
             }
             """
         )
         agent = RiskAssessAgent(fake)
-        req = RiskAssessInput(items=["Katsu Don"], avoid=["egg", "milk"])
+        req = RiskAssessInput(items=["LA Special Steak"], avoid=["egg", "milk"])
 
         result = agent.run(req)
 
         self.assertEqual(len(result.items), 1)
         item = result.items[0]
-        self.assertEqual(item.menu, "Katsu Don")
-        self.assertEqual(item.risk, 35)
-        self.assertEqual(item.confidence, 0.0)
-        self.assertEqual(item.suspected_ingredients, ["egg", "pork", "onion"])
+        self.assertEqual(item.menu, "LA Special Steak")
+        self.assertEqual(item.suspected_ingredients, ["beef"])
         self.assertEqual(item.matched_avoid, [])
         self.assertEqual(item.avoid_evidence, [])
-        self.assertEqual(item.why_ko, "기피 재료 근거 부족")
 
-    def test_returns_empty_if_items_empty(self):
-        fake = FakeGemma('{"items": []}')
-        agent = RiskAssessAgent(fake)
-        req = RiskAssessInput(items=[], avoid=["egg"])
-
-        result = agent.run(req)
-
-        self.assertEqual(result.items, [])
-
-    def test_low_confidence_uncertain_becomes_no_match(self):
+    def test_matches_child_canonical_to_parent_avoid(self):
         fake = FakeGemma(
             """
             {
               "items": [
                 {
-                  "menu": "Katsu Don",
-                  "risk": 90,
-                  "confidence": 0.2,
-                  "suspected_ingredients": ["egg"],
-                  "matched_avoid": ["egg"],
-                  "avoid_evidence": [
-                    {"ingredient": "egg", "evidence_type": "uncertain", "note_ko": "불확실"}
-                  ],
-                  "why_ko": "계란 같음"
+                  "menu_name": "Penne Arrabbiata Pasta",
+                  "confidence": 0.8,
+                  "suspects": [
+                    {"canonical": "wheat", "evidence_type": "alias", "evidence_text": "Pasta", "reason": "pasta base", "confidence": 0.8}
+                  ]
                 }
               ]
             }
             """
         )
         agent = RiskAssessAgent(fake)
-        req = RiskAssessInput(items=["Katsu Don"], avoid=["egg"])
+        req = RiskAssessInput(items=["Penne Arrabbiata Pasta"], avoid=["gluten"])
 
         result = agent.run(req)
 
         self.assertEqual(len(result.items), 1)
         item = result.items[0]
-        self.assertEqual(item.matched_avoid, [])
-        self.assertEqual(item.avoid_evidence, [])
-        self.assertLessEqual(item.risk, 35)
+        self.assertEqual(item.matched_avoid, ["gluten"])
+        self.assertEqual(len(item.avoid_evidence), 1)
+        self.assertEqual(item.avoid_evidence[0].canonical, "wheat")
 
-    def test_fills_missing_menu_items_with_conservative_fallback(self):
+    def test_matches_parent_canonical_to_child_avoid_conservatively(self):
         fake = FakeGemma(
             """
             {
               "items": [
                 {
-                  "menu": "Menu A",
-                  "risk": 20,
+                  "menu_name": "Fettuccine Alfredo Pasta",
                   "confidence": 0.9,
-                  "suspected_ingredients": [],
-                  "matched_avoid": [],
-                  "avoid_evidence": [],
-                  "why_ko": "기피 재료 근거 부족"
+                  "suspects": [
+                    {"canonical": "dairy", "evidence_type": "menu_prior", "evidence_text": null, "reason": "alfredo profile", "confidence": 0.9}
+                  ]
+                }
+              ]
+            }
+            """
+        )
+        agent = RiskAssessAgent(fake)
+        req = RiskAssessInput(items=["Fettuccine Alfredo Pasta"], avoid=["milk"])
+
+        result = agent.run(req)
+
+        self.assertEqual(len(result.items), 1)
+        self.assertEqual(result.items[0].matched_avoid, ["milk"])
+        self.assertEqual(result.items[0].avoid_evidence[0].canonical, "dairy")
+
+    def test_matches_same_family_sibling_canonical(self):
+        fake = FakeGemma(
+            """
+            {
+              "items": [
+                {
+                  "menu_name": "Cheese Pasta",
+                  "confidence": 0.8,
+                  "suspects": [
+                    {"canonical": "cheese", "evidence_type": "menu_prior", "evidence_text": null, "reason": "cheese profile", "confidence": 0.8}
+                  ]
+                }
+              ]
+            }
+            """
+        )
+        agent = RiskAssessAgent(fake)
+        req = RiskAssessInput(items=["Cheese Pasta"], avoid=["milk"])
+
+        result = agent.run(req)
+
+        self.assertEqual(len(result.items), 1)
+        self.assertEqual(result.items[0].matched_avoid, ["milk"])
+        self.assertEqual(result.items[0].avoid_evidence[0].canonical, "cheese")
+
+    def test_caps_suspects_to_five_items(self):
+        fake = FakeGemma(
+            """
+            {
+              "items": [
+                {
+                  "menu_name": "Sample Dish",
+                  "confidence": 0.8,
+                  "suspects": [
+                    {"canonical": "egg", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "milk", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "cheese", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "butter", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "peanut", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "tree nut", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "soy", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "wheat", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "shrimp", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "crab", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "fish", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4},
+                    {"canonical": "beef", "evidence_type": "weak_inference", "evidence_text": null, "reason": "", "confidence": 0.4}
+                  ]
+                }
+              ]
+            }
+            """
+        )
+        agent = RiskAssessAgent(fake)
+        req = RiskAssessInput(items=["Sample Dish"], avoid=["egg"])
+
+        result = agent.run(req)
+
+        self.assertEqual(len(result.items), 1)
+        self.assertEqual(len(result.items[0].suspected_ingredients), 5)
+
+    def test_fills_missing_menu_items_with_fallback_item(self):
+        fake = FakeGemma(
+            """
+            {
+              "items": [
+                {
+                  "menu_name": "Menu A",
+                  "confidence": 0.8,
+                  "suspects": []
                 }
               ]
             }
@@ -117,37 +187,9 @@ class RiskAssessAgentTest(unittest.TestCase):
         result = agent.run(req)
 
         self.assertEqual([it.menu for it in result.items], ["Menu A", "Menu B"])
-        self.assertEqual(result.items[1].risk, 60)
+        self.assertEqual(result.items[1].risk, 0)
         self.assertEqual(result.items[1].confidence, 0.0)
-        self.assertEqual(result.items[1].why_ko, "위험도 판단 실패(항목 누락 보수적 처리)")
-
-    def test_normalizes_avoid_matching_for_case_difference(self):
-        fake = FakeGemma(
-            """
-            {
-              "items": [
-                {
-                  "menu": "Menu A",
-                  "risk": 60,
-                  "confidence": 0.9,
-                  "suspected_ingredients": ["egg"],
-                  "matched_avoid": ["Egg"],
-                  "avoid_evidence": [
-                    {"ingredient": "Egg", "evidence_type": "direct", "note_ko": "표기에 대소문자 차이"}
-                  ],
-                  "why_ko": "계란 근거"
-                }
-              ]
-            }
-            """
-        )
-        agent = RiskAssessAgent(fake)
-        req = RiskAssessInput(items=["Menu A"], avoid=["egg"])
-
-        result = agent.run(req)
-
-        self.assertEqual(result.items[0].matched_avoid, ["egg"])
-        self.assertEqual(result.items[0].avoid_evidence[0].ingredient, "egg")
+        self.assertEqual(result.items[1].matched_avoid, [])
 
 
 if __name__ == "__main__":
